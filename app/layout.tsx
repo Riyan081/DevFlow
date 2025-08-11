@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "next-themes";
+import  ThemeProvider  from "@/context/Theme";
 import localFont from "next/font/local";
-
+import Navbar from "@/components/navigation/navbar/navbar";
 
 const inter = localFont({
     src: "./fonts/InterVF.ttf",
@@ -42,6 +42,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Navbar/>
           {children}
         </ThemeProvider>
       </body>
