@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import  ThemeProvider  from "@/context/Theme";
+import ThemeProvider from "@/context/Theme";
 import localFont from "next/font/local";
-import Navbar from "@/components/navigation/navbar/navbar";
+import { Toaster } from "sonner";
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/auth";
+import { ReactNode } from "react";
 
 const inter = localFont({
     src: "./fonts/InterVF.ttf",
@@ -23,29 +25,31 @@ export const metadata: Metadata = {
   description:
     "A community-driven platform for asking and answering programing pquestions. Get help, share knowledge, and collab with developers from around the world Explore Topics in web development, mobile app development, algorithm, data structures, and more",
   icons: {
-    icon: "./images/site-logo.svg",
+    icon: "/images/site-logo.svg",
   },
 };
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+const RootLayout = async ({ children }: { children: ReactNode }) => {
+  const session = await auth();
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}
+        className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}
+        suppressHydrationWarning
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navbar/>
-          {children}
-        </ThemeProvider>
+        <SessionProvider session={session}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;

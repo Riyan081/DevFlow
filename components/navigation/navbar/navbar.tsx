@@ -4,7 +4,7 @@ import Image from "next/image";
 import Theme from "./Theme";
 const Navbar = () => {
   return (
-    <nav className="bg-white dark:bg-[#0A0E12] w-full flex justify-between items-center p-5 dark:shadow-none sm:px-12 gap-5">
+    <nav className="bg-white dark:bg-[#0A0E12] w-full flex justify-between items-center p-5 dark:shadow-none sm:px-12 gap-5" suppressHydrationWarning>
       <Link href="/" className="flex items-center gap-1">
         <Image
         src="/images/site-logo.svg"
@@ -19,7 +19,7 @@ const Navbar = () => {
 
       <p>Global search</p>
 
-      <div><Theme/></div>
+      <div suppressHydrationWarning><Theme/></div>
     </nav>
   );
 };
