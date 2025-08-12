@@ -17,7 +17,7 @@ const AuthLayout = ({ children }: { children: ReactNode }) => {
             alt="DevFlow Logo" 
             height={40} 
             width={40}
-            className="sm:h-12 sm:w-12 lg:h-14 lg:w-14 filter-none dark:filter dark:brightness-0 dark:invert"
+            className="sm:h-12 sm:w-12 lg:h-14 lg:w-14  text-orange-400"
           />
         </div>
         

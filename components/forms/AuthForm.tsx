@@ -3,12 +3,21 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
- 
+ import { FieldValues } from "react-hook-form"
 import { Button } from "@/components/ui/button"
+import { DefaultValues } from "react-hook-form"
+import { SubmitHandler } from "react-hook-form"
+import { ZodType } from "zod"
+import { Control } from "react-hook-form"
+import { Resolver } from "react-hook-form"
+import Link from "next/link"
+import ROUTES from "@/constants/routes" 
+
+
 import {
   Form,
   FormControl,
-  FormDescription,
+
   FormField,
   FormItem,
   FormLabel,
@@ -16,48 +25,79 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
-const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-})
 
-const AuthForm = () =>{
+
+interface AuthFormProps<T extends FieldValues>{
+    schema:ZodType<T>;
+    defaultValues:T;
+    onSubmit:(data:T)=>Promise<{success:boolean}>
+    formType:'SIGN_IN' | "SIGN_UP";
+}
+const AuthForm = <T extends FieldValues>({
+    schema,
+    defaultValues,
+    formType,
+    onSubmit,
+}:AuthFormProps<T>) =>{
   // 1. Define your form.
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: "",
-    },
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+    defaultValues: defaultValues as DefaultValues<T>
   })
+ 
+  const handleSubmit: SubmitHandler<T> = async()=>{ 
+    //todo
+  };
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
-  }
+  const buttonText = formType ==="SIGN_IN"? 'Sign In': "Sign Up";
+
 
    return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      {Object.keys(defaultValues).map((field)=>(
+ <FormField 
+ key={field}
           control={form.control}
-          name="username"
+          name={field as Path<T>}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>{field.name==='email'? "Email Address ": field.name.charAt(0).toUpperCase()+field.name.slice(1)}</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input required type={field.name==="password" ? "password" : "text"} {...field}
+                className="mt-1"/>
               </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
+             
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+      ))}
+        
+       
+        <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-200" type="submit">
+          {form.formState.isSubmitting
+            ? (buttonText === 'Sign In' ? 'Signing In...' : 'Signing Up...')
+            : buttonText}
+        </Button>
+
+        {formType === "SIGN_IN" ? (
+        <p>
+            Dont't have an account?{" "}
+            <Link href={ROUTES.SIGN_UP}
+            className="bg-gradient-to-r from-orange-500 to-orange-200 bg-clip-text text-transparent font-semibold hover:from-orange-200 hover:to-orange-500">
+              Sign Up
+            </Link>
+          </p>
+        ) : (
+          <p>
+            Already have an account?{" "}
+            <Link href={ROUTES.SIGN_IN}
+            className="bg-gradient-to-r from-orange-500 to-orange-200 bg-clip-text text-transparent font-semibold hover:from-orange-200 hover:to-orange-500">
+              Sign In
+            </Link>
+          </p>
+        )}
       </form>
     </Form>
   )

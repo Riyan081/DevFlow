@@ -26,8 +26,8 @@ const SocialAuthForm = () => {
     }
   };
   return (
-    <div className="flex flex-wrap gap-3 mt-10 justify-center">
-      <Button className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 px-6 py-3 transition-colors duration-200 rounded-lg"
+    <div className="flex flex-wrap gap-3 mt-5 justify-center">
+      <Button className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 px-8 py-5 transition-colors duration-200 rounded-lg"
        onClick={()=>{
         handleSignin("github");
        }}
@@ -42,7 +42,7 @@ const SocialAuthForm = () => {
         <span className="text-white dark:text-white font-medium">Log in with Github</span>
       </Button>
 
-      <Button className="flex items-center gap-2 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 px-6 py-3 transition-colors duration-200 rounded-lg"
+      <Button className="flex items-center gap-2 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 px-8 py-5 transition-colors duration-200 rounded-lg"
        onClick={()=>{handleSignin("google")}}
        >
         <Image 
