@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Theme from "./Theme";
+import MobileNavigation from "./MobileNavigation";
 const Navbar = () => {
   return (
     <nav className="bg-white dark:bg-[#0A0E12] w-full flex justify-between items-center p-5 dark:shadow-none sm:px-12 gap-5" suppressHydrationWarning>
@@ -20,6 +21,7 @@ const Navbar = () => {
       <p>Global search</p>
 
       <div suppressHydrationWarning><Theme/></div>
+      <MobileNavigation/>
     </nav>
   );
 };

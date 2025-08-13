@@ -5,11 +5,11 @@ import ROUTES from "@/constants/routes";
 
 
 export default async function Home() {
-  const session = await auth();
-  console.log(session);
+//  const session = await auth();
+//  console.log(session);
   return (
-   <div suppressHydrationWarning>
-
+   <div suppressHydrationWarning >
+hi
    </div>
   );
 }
