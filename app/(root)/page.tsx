@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import ROUTES from "@/constants/routes";
 import Link from "next/link";
 import LocalSearch from "@/components/search/LocalSearch";
-
+import HomeFilter from "@/components/filters/HomeFilter"
 
 
   const questions = [
@@ -31,7 +31,7 @@ import LocalSearch from "@/components/search/LocalSearch";
       title: "What is the best way to learn Next.js?",
       description: "I am new to Next.js, any tips?",
       tags:[
-        {_id: "3", name:"Next.js"},
+        {_id: "3", name:"javascript"},
         {_id:"4", name:"React"},
        ],
        author:{
@@ -55,11 +55,16 @@ export default async function Home({searchParams}: SearchParams) {
   //  const session = await auth();
   //  console.log(session);
 
-  const {query = ""} = await searchParams;
+  const {query = "",filter=""} = await searchParams;
    
-  const filterQuestions = questions.filter((question)=>(
-    question.title.toLowerCase().includes(query?.toLowerCase())
-  ))
+   const filteredQuestions = questions.filter((question)=>{
+     const matchQuery = question.title.toLowerCase().includes(query.toLowerCase());
+     const matchFilter = filter? question.tags[0].name.toLowerCase() === filter.toLowerCase() : true;
+     return matchQuery && matchFilter;
+  })
+  // const filterQuestions = questions.filter((question)=>(
+  //   question.title.toLowerCase().includes(query?.toLowerCase())
+  // ))
 
   return (
     <>
@@ -77,12 +82,12 @@ export default async function Home({searchParams}: SearchParams) {
           otherClasses="flex-1"
         />
       </section>
-      HomeFilter
-      <div className="mt-10 flex-w-full flex-col gap-6">
-       {filterQuestions.map((question)=>(
-     <h1 key={question._id}>{question.title}</h1>
-       ))}
-      </div>
+     <HomeFilter/>
+     <div>
+      {filteredQuestions.map((question)=>(
+        <h1 key={question._id}>{question.title}</h1>
+      ))}
+     </div>
     </>
   );
 }
