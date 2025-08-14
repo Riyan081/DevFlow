@@ -2,7 +2,10 @@ import React from 'react'
 
 const Profile = ({params}:{params:{id:number}}) => {
   return (
-    <div>Profile</div>
+    <div>
+      <h1>Profile</h1>
+      <p>User ID: {params.id}</p>
+    </div>
   )
 }
 

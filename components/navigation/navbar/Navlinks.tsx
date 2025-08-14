@@ -19,12 +19,11 @@ const Navlinks = ({ isMobileNav = false }: { isMobileNav?: boolean }) => {
 
   if (!mounted) {
     return (
-      <div className={cn("space-y-2", isMobileNav ? "w-full" : "")}>
+      <div className={cn("space-y-2", isMobileNav ? "w-full" : "")} suppressHydrationWarning>
         {sidebarlinks.map((item) => (
           <div
             key={item.label}
             className={cn(
-             
               isMobileNav ? "w-full" : ""
             )}
           >
