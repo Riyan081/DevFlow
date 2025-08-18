@@ -5,9 +5,9 @@ import { getDeviconsClassName } from '@/lib/utils';
 interface Props{
     _id:string;
     name:string;
-    questions:number;
-    showCount:boolean;
-    compact:boolean;
+    questions?:number;
+    showCount?:boolean;
+    compact?:boolean;
 }
 
 
