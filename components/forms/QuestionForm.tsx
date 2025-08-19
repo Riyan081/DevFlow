@@ -2,25 +2,52 @@
 
 import React, { useRef, useState } from "react";
 import { MDXEditorMethods } from "@mdxeditor/editor";
-import Editor from "../editor";
+import dynamic from "next/dynamic";
+const Editor = dynamic(() => import("../editor"), { ssr: false });
+import TagCard from "../cards/TagCard";
 
 const QuestionForm = () => {
   const editorRef = useRef<MDXEditorMethods>(null);
   const [editorValue, setEditorValue] = useState<string>("");
   const [title, setTitle] = useState<string>("");
-  const [tags, setTags] = useState<string>("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState<string>("");
+  const [tagError, setTagError] = useState<string>("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Access the editor content
     const markdown = editorRef.current?.getMarkdown() || editorValue;
     console.log("Form Submitted:", { title, markdown, tags });
     // Add your form submission logic here (e.g., API call)
   };
 
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const newTag = e.currentTarget.value.trim();
+
+      if (newTag && newTag.length <= 15 && !tags.includes(newTag) && tags.length < 5) {
+        setTags([...tags, newTag]);
+        setTagInput("");
+        setTagError("");
+      } else if (newTag.length > 15) {
+        setTagError("Tag should be less than 15 characters");
+      } else if (tags.includes(newTag)) {
+        setTagError("Tag already exists");
+      } else if (tags.length >= 5) {
+        setTagError("Maximum 5 tags allowed");
+      }
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+    setTagError("");
+  };
+
   return (
     <form
-      className="w-full  mx-auto px-2 sm:px-4 md:px-6 lg:px-8 xl:px-0 mt-8 overflow-y-auto"
+      className="w-full mx-auto px-2 sm:px-4 md:px-6 lg:px-8 xl:px-0 mt-8 overflow-y-auto"
       onSubmit={handleSubmit}
     >
       <div>
@@ -42,13 +69,14 @@ const QuestionForm = () => {
         <label className="block text-base font-semibold text-gray-100 mb-1">
           Detailed explanation of your problem <span className="text-orange-400">*</span>
         </label>
-        <Editor
-          value={editorValue}
-          editorRef={editorRef}
-          onChange={setEditorValue}
-          markdown="" // Default empty markdown
-          
-        />
+        <div suppressHydrationWarning={true}>
+          <Editor 
+            value={editorValue}
+            editorRef={editorRef}
+            onChange={setEditorValue}
+            markdown=""
+          />
+        </div>
         <p className="text-xs text-gray-400/80 mt-1">
           Introduce the problem and expand on what you put in the title.
         </p>
@@ -61,10 +89,23 @@ const QuestionForm = () => {
           type="text"
           placeholder="Add tags..."
           className="bg-[#18181b] w-full h-11 rounded-md mt-1 px-3 text-sm text-gray-100 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400"
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-          required
+          value={tagInput}
+          onChange={(e) => setTagInput(e.target.value)}
+          onKeyDown={handleInputKeyDown}
+          required={tags.length === 0}
         />
+        {tagError && (
+          <p className="text-xs text-red-400 mt-1">{tagError}</p>
+        )}
+        {tags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+             
+                <TagCard key={tag} _id={tag} name={tag} removeTag={removeTag} isQuestionTag={true}/>
+               
+            ))}
+          </div>
+        )}
         <p className="text-xs text-gray-400/80 mt-1">
           Add up to three tags to describe what your question is about. Press enter to add a tag.
         </p>
@@ -72,7 +113,7 @@ const QuestionForm = () => {
       <div className="mt-7">
         <button
           type="submit"
-          className="bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 transition-colors"
+          className="bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 transition-colors mb-10"
         >
           Submit Question
         </button>
