@@ -2,7 +2,7 @@
 import mongoose, { Mongoose } from "mongoose";
 import logger from './logger';
 
-const MONGODB_URI = process.env.MONGODB_URI as string;
+const MONGODB_URI = process.env.MONGO_URI ;
 
 if (!MONGODB_URI) {
   throw new Error("MONGODB_URI is not defined");
