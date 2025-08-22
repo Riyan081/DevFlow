@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     const newAccount = await Account.create({
-      validateData,
+      ...validateData,
     });
 
     return NextResponse.json(
