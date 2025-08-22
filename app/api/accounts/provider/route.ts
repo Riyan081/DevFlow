@@ -11,7 +11,7 @@ export async function POST(req:NextRequest){
     const {providerAccountId} = body;
     if(!providerAccountId){
         return NextResponse.json(
-            { message: "Email is required" },
+            { message: "ProvideraccountId is required" },
             { status: 400 }
         );
     }

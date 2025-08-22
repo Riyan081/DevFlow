@@ -6,7 +6,7 @@ import Link from "next/link";
 import LocalSearch from "@/components/search/LocalSearch";
 import HomeFilter from "@/components/filters/HomeFilter"
 import QuestionCard from "@/components/cards/QuestionCard";
-
+import { api } from "@/lib/api";
 
   const questions = [
     {
@@ -46,6 +46,14 @@ import QuestionCard from "@/components/cards/QuestionCard";
       createdAt: new Date(),
     }
   ];
+
+  const test = async ()=>{
+     try{
+    return await api.users.getAll();
+     }catch(err){
+        console.error("Error in test function:", err);
+     }
+  }
  
   //this is for symultanous result with search 
   interface SearchParams{
@@ -56,6 +64,10 @@ import QuestionCard from "@/components/cards/QuestionCard";
 export default async function Home({searchParams}: SearchParams) {
   //  const session = await auth();
   //  console.log(session);
+  console.log("Before test");
+  const user = await test();
+  console.log("User data:", user);
+  console.log("After test");
 
   const {query = "",filter=""} = await searchParams;
    
