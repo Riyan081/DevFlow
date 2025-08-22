@@ -89,6 +89,25 @@ export async function POST(req: NextRequest) {
 }
 
 
+export async function GET(req:NextRequest){
+   
+    try{
+        await dbConnect();
+        const users = await User.find();
 
+        return NextResponse.json({
+            sucess:true,
+            data:users
+        },{
+            status:200
+        })
+    }catch(error){
+        console.log("Error connecting to database:", error);
+        return NextResponse.json(
+            { message: "Internal Server Error while connecting to database" },
+            { status: 500 }
+        );
+    }
+}
 
 

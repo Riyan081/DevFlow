@@ -43,3 +43,13 @@ export const SignupSchema = z.object({
     }),
 });
 
+
+export const AccountSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
+  name: z.string().min(1, "Name is required"),
+  image: z.string().url("Image must be a valid URL").optional(),
+  password: z.string().min(1, "Password is required").optional(),
+  provider: z.string().min(1, "Provider is required"),
+  providerAccountId: z.string().min(1, "Provider Account ID is required"),
+});
+

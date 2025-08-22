@@ -87,6 +87,7 @@ export async function PUT(req:NextRequest,{params}:{params:{id:string}}){
     }
 
     const body = await req.json();
+    
     const requirebody = z.object({
       name: z.string().min(1, "Name is required"),
       username: z.string().min(1, "Username is required"),
@@ -122,6 +123,7 @@ export async function PUT(req:NextRequest,{params}:{params:{id:string}}){
             { new: true, runValidators: true }
         );
         
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } catch(e:any){
     console.log("Error updating user:", e);
