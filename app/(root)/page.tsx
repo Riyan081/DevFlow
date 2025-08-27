@@ -62,12 +62,12 @@ import { api } from "@/lib/api";
 
 
 export default async function Home({searchParams}: SearchParams) {
-  //  const session = await auth();
-  //  console.log(session);
+    const session = await auth();
+    console.log(session);
   console.log("Before test");
-  const user = await test();
-  console.log("User data:", user);
-  console.log("After test");
+  
+  
+  
 
   const {query = "",filter=""} = await searchParams;
    

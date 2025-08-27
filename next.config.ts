@@ -1,11 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages:["pino","pino-pretty"],
+  serverExternalPackages: ["pino", "pino-pretty"],
   images: {
-    domains: ['encrypted-tbn0.gstatic.com'],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "encrypted-tbn0.gstatic.com",
+      },
+    ],
   },
   /* other config options here */
 };
 
 export default nextConfig;
+// filepath: e:\devflow2.0\next.config.ts

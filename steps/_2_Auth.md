@@ -155,3 +155,10 @@ export default ROUTES;
 4. Copy Client ID and Secret to `.env.local`
 
 **This process creates a fully working NextAuth v5 setup!** 🚀
+
+
+
+
+-- if user uses github oauth well create an account containing github oauth info and then create a user with github name username and image
+-- if users uses googles 0auth we will create account containing google oauth info and then create a user with google name, username, and image.
+-- if useruses github oauth first then google o auth or vise versa we will create that o auth account and and update user info to show the oauth name and image the username will stay as it has been created it wont fluctuate 

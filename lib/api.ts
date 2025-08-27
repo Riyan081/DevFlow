@@ -1,6 +1,7 @@
 import { IUser } from "@/database/user.model";
 import { fetchHandler } from "./handlers/fetch";
 import { IAccount } from "@/database/account.model";
+import { SignInWithOAuthParams } from "@/types/global";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api";
@@ -57,4 +58,14 @@ export const api = {
         method: "DELETE",
       }),
   },
+
+  auth:{
+    oAuthSignIn: ({user,provider,providerAccountId}:SignInWithOAuthParams) =>{
+    return   fetchHandler(`${API_BASE_URL}/auth/signin-with-oauth`,{
+        method: "POST",
+        body: JSON.stringify({user,provider,providerAccountId}),
+      })
+    }
+  }
+  
 };

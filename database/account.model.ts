@@ -4,6 +4,7 @@ import { models } from "mongoose";
 export interface IAccount{
     userId:Types.ObjectId;
     name:string;
+    password?:string;
     image?:string;
     provider:string;
     providerAccountId:string;
@@ -27,7 +28,7 @@ const AccountSchema = new mongoose.Schema({
 
     password:{
         type:String,
-        required:true
+        
     },
 
     provider:{

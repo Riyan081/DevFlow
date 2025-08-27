@@ -1,3 +1,4 @@
+import { SignInWithOAuthSchema } from './../lib/validations';
 
 interface Tag{
     _id:string;
@@ -21,4 +22,13 @@ interface Question{
     views:number;
 }
 
- 
+ interface SignInWithOAuthParams{
+   provider: 'github' | 'google',
+   providerAccountId: string,
+    user:{
+      name:string;
+      username:string;
+      email:string;
+      image?:string;
+    }
+ }
