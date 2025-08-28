@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Profile = ({params}:{params:{id:number}}) => {
+const Profile = async ({params}:{params:{id:number}}) => {
   return (
     <div>
       <h1>Profile</h1>

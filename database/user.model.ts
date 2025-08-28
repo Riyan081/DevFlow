@@ -7,7 +7,7 @@ export interface IUser{
   username: string;
   email: string;
   bio?: string;
-  image: string;
+  image?: string;
   location?: string;
   portfolio?: string;
   reputation?: number;
@@ -38,7 +38,7 @@ const UserSchema = new mongoose.Schema({
 
     image:{
         type:String,
-        required:true
+       
 
     },
 
@@ -62,5 +62,6 @@ const UserSchema = new mongoose.Schema({
 
 
 const User = models.User || mongoose.model<IUser>("User",UserSchema);
+
 export default User;
 

@@ -24,13 +24,17 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { ActionResponse } from "@/lib/handlers/fetch"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import { Path } from "react-hook-form"
 
 
 
 interface AuthFormProps<T extends FieldValues>{
     schema:ZodType<T>;
     defaultValues:T;
-    onSubmit:(data:T)=>Promise<{success:boolean}>
+    onSubmit:(data:T)=>Promise<ActionResponse>;
     formType:'SIGN_IN' | "SIGN_UP";
 }
 const AuthForm = <T extends FieldValues>({
@@ -40,13 +44,26 @@ const AuthForm = <T extends FieldValues>({
     onSubmit,
 }:AuthFormProps<T>) =>{
   // 1. Define your form.
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: defaultValues as DefaultValues<T>
   })
  
-  const handleSubmit: SubmitHandler<T> = async()=>{ 
-    //todo
+  const handleSubmit: SubmitHandler<T> = async(data)=>{ 
+    const result = (await onSubmit(data)) as ActionResponse<T>;
+
+    if(result?.success){
+      toast(
+        formType === "SIGN_IN"
+          ? "You have successfully signed in."
+          : "Your account has been created successfully."
+      );
+      router.push(ROUTES.HOME);
+    } else{
+      toast.error(result?.message || "An error occurred. Please try again.");
+    }
   };
 
   const buttonText = formType ==="SIGN_IN"? 'Sign In': "Sign Up";

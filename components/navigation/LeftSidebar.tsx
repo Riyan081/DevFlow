@@ -3,15 +3,27 @@ import Navlinks from "./navbar/Navlinks";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ROUTES from "@/constants/routes";
+import { auth } from "@/auth";
+import { signOut } from "@/auth";
 
+const LeftSidebar = async () => {
+  const session = await auth();
+  const userId = session?.user?.id;
 
-const LeftSidebar = () => {
   return (
     <div className="bg-[#121212] left-0 top-0 p-2 gap-4 max-sm:hidden lg:w-[210px] md:w-[64px] flex flex-col justify-between" style={{ height: "calc(100vh - 78px)" }}>
       <div>
-        <Navlinks />
+        <Navlinks userId = {userId} />
       </div>
-      <div className="flex flex-col gap-2 items-center">
+
+      {userId ? (
+       <form action={async ()=>{
+        "use server"
+        await signOut();
+       }}>
+        <Button type="submit" className="w-fit px-15 py-4 mx-2 !bg-transparent text-amber-50 border-red-50 border-2">Logout</Button>
+       </form>
+      ):(<div className="flex flex-col gap-2 items-center">
        
         <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors">
           <Link href={ROUTES.SIGN_IN}>Log in</Link>
@@ -23,7 +35,10 @@ const LeftSidebar = () => {
           <Link href={ROUTES.SIGN_UP}>Sign up</Link>
         </Button>
       </div>
-    </div>
+   
+    )}
+     </div>
+      
   );
 };
 

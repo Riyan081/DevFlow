@@ -8,10 +8,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { SheetClose } from "@/components/ui/sheet";
 
-const Navlinks = ({ isMobileNav = false }: { isMobileNav?: boolean }) => {
+const Navlinks = ({ isMobileNav = false,userId }: { isMobileNav?:boolean , userId?:string }) => {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
-  const userId = 1;
+ 
 
   useEffect(() => {
     setMounted(true);
