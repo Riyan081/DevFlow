@@ -9,6 +9,7 @@ import bcrypt from "bcryptjs";
 import Credentials from "next-auth/providers/credentials";
 import { SigninSchema } from "@/lib/validations";
 import { IAccount } from "./database/account.model";
+import { IUser } from "./database/user.model";
 // ✅ Main NextAuth configuration
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -20,118 +21,90 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientId: process.env.AUTH_GOOGLE_ID!,
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
     }),
-    Credentials({
+   Credentials({
       async authorize(credentials) {
-        const validatedFileds = SigninSchema.safeParse(credentials);
-        if (validatedFileds.success) {
-          const { email, password } = validatedFileds.data;
-          const { data: existingAccount } = await api.accounts.getByProvider(
+        const validatedFields = SigninSchema.safeParse(credentials);
+
+        if (validatedFields.success) {
+          const { email, password } = validatedFields.data;
+
+          const { data: existingAccount } = (await api.accounts.getByProvider(
             email
-          );
+          )) as ActionResponse<IAccount>;
 
           if (!existingAccount) return null;
 
-          // Add a type assertion to inform TypeScript about the shape of existingAccount
-          const accountWithPassword = existingAccount as {
-            userId: string | number;
-            password: string;
-          };
-          const userId = accountWithPassword.userId;
-          const { data: existingUser } = await api.users.getById(
-            userId.toString()
-          );
-          if (!existingUser) return null;
+          const { data: existingUser } = (await api.users.getById(
+            existingAccount.userId.toString()
+          )) as ActionResponse<IUser>;
 
-          // Add a type assertion for existingUser to inform TypeScript about its shape
-          const user = existingUser as {
-            id: string | number;
-            name: string;
-            email: string;
-            image?: string;
-          };
+          if (!existingUser) return null;
 
           const isValidPassword = await bcrypt.compare(
             password,
-            accountWithPassword.password
+            existingAccount.password!
           );
 
           if (isValidPassword) {
             return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              image: user.image,
+              id: existingUser.id,
+              name: existingUser.name,
+              email: existingUser.email,
+              image: existingUser.image,
             };
           }
-          return null;
         }
+        return null;
       },
     }),
   ],
-
+  
   callbacks: {
-    // ✅ Adds user.id to session
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.sub as string;
-      }
+      session.user.id = token.sub as string;
       return session;
     },
-
-    // ✅ Runs when creating JWT token
     async jwt({ token, account }) {
       if (account) {
-        try {
-          // ✅ Look up existing account from your API
-          const { data: existingAccount, success } =
-            await api.accounts.getByProvider(
-              account.type === "credentials"
-                ? token.email!
-                : account.providerAccountId
-            );
+        const { data: existingAccount, success } =
+          (await api.accounts.getByProvider(
+            account.type === "credentials"
+              ? token.email!
+              : account.providerAccountId
+          )) as ActionResponse<IAccount>;
 
-          if (success && existingAccount) {
-            const userId = (existingAccount as { userId?: string | number })
-              .userId;
-            if (userId) {
-              token.sub = userId.toString();
-            }
-          }
-        } catch (err) {
-          console.error("JWT callback error:", err);
-        }
+        if (!success || !existingAccount) return token;
+
+        const userId = existingAccount.userId;
+
+        if (userId) token.sub = userId.toString();
       }
 
       return token;
     },
-
-    // ✅ Runs when user signs in
-    async signIn({ user, account, profile }) {
+    async signIn({ user, profile, account }) {
       if (account?.type === "credentials") return true;
       if (!account || !user) return false;
 
-      try {
-        const userInfo = {
-          name: user.name ?? "Unknown",
-          email: user.email ?? "",
-          image: user.image ?? "",
-          username:
-            account.provider === "github"
-              ? (profile?.login as string)
-              : user.name?.toLowerCase() ?? "",
-        };
+      const userInfo = {
+        name: user.name!,
+        email: user.email!,
+        image: user.image!,
+        username:
+          account.provider === "github"
+            ? (profile?.login as string)
+            : (user.name?.toLowerCase() as string),
+      };
 
-        const { success } = (await api.auth.oAuthSignIn({
-          user: userInfo,
-          provider: account.provider as "github" | "google",
-          providerAccountId: account.providerAccountId,
-        })) as ActionResponse<any>;
+      const { success } = (await api.auth.oAuthSignIn({
+        user: userInfo,
+        provider: account.provider as "github" | "google",
+        providerAccountId: account.providerAccountId,
+      })) as ActionResponse;
 
-        return success;
-      } catch (err) {
-        console.error("SignIn callback error:", err);
-        return false;
-      }
+      if (!success) return false;
+
+      return true;
     },
   },
 });

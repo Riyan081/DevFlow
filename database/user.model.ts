@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { models } from "mongoose";
 
 export interface IUser{
+  id: string | undefined;
  name: string;
   username: string;
   email: string;

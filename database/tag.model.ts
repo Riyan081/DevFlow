@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { models } from "mongoose";
 
 
-interface ITag{
+ export interface ITag{
     name:string;
     questions:number;
 }
@@ -17,7 +17,7 @@ const TagSchema = new mongoose.Schema({
     },
 
     questions:{
-        Type:Number,
+        type:Number,
         default:0,
     }
 },{

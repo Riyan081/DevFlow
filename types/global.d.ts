@@ -14,6 +14,7 @@ interface Author{
 interface Question{
     _id:string;
     title:string;
+    content:string;
     tags: Tag[];
     author:Author;
     createdAt: Date;
@@ -39,3 +40,28 @@ interface Question{
   email:string;
   password:string;
  }
+
+interface CreateQuestionParams{
+title:string;
+content:string;
+tags:string[]; // array of tag names
+
+}
+
+
+interface EditQuestionParams extends CreateQuestionParams{
+  questionId:string;
+}
+
+
+interface GetQuestionParams{
+  questionId:string;
+}
+
+interface PaginationSearchParams{
+  page?:number;
+  pageSize?:number;
+  query?:string;
+  filter?:string;
+  sort?:string;
+}

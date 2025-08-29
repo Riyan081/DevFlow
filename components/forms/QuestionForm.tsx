@@ -5,21 +5,62 @@ import { MDXEditorMethods } from "@mdxeditor/editor";
 import dynamic from "next/dynamic";
 const Editor = dynamic(() => import("../editor"), { ssr: false });
 import TagCard from "../cards/TagCard";
+import { createQuestion } from "@/lib/actions/question.action";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { Question } from "@/types/global";
+import { editQuestion } from "@/lib/actions/question.action";
 
-const QuestionForm = () => {
+const QuestionForm = ({question,isEdit=false}:{question?:Question, isEdit?:boolean}) => {
+  const router = useRouter();
   const editorRef = useRef<MDXEditorMethods>(null);
-  const [editorValue, setEditorValue] = useState<string>("");
-  const [title, setTitle] = useState<string>("");
-  const [tags, setTags] = useState<string[]>([]);
+  const [editorValue, setEditorValue] = useState<string>(question?.content || "");
+  const [title, setTitle] = useState<string>(question?.title || "");;
+  const [tags, setTags] = useState<string[]>(question?.tags.map(tag => tag.name) || []);
   const [tagInput, setTagInput] = useState<string>("");
   const [tagError, setTagError] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const markdown = editorRef.current?.getMarkdown() || editorValue;
-    console.log("Form Submitted:", { title, markdown, tags });
-    // Add your form submission logic here (e.g., API call)
-  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const markdown = editorRef.current?.getMarkdown() || editorValue;
+
+  let result;
+  if (isEdit && question) {
+    result = await editQuestion({
+      questionId: question._id,
+      title,
+      content: markdown,
+      tags,
+    });
+  } else {
+    result = await createQuestion({
+      title,
+      content: markdown,
+      tags,
+    });
+  }
+
+  if (result.success) {
+    // Reset form only if creating
+    if (!isEdit) {
+      setTitle("");
+      setEditorValue("");
+      setTags([]);
+      setTagInput("");
+      setTagError("");
+      if (editorRef.current) {
+        editorRef.current.setMarkdown("");
+      }
+    }
+    toast("Your question has been " + (isEdit ? "updated" : "posted") + " successfully.");
+    router.push(`/questions/${result.data?._id}`);
+  } else {
+    toast.error(result.error || "Something went wrong");
+  }
+};
+
+
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -115,7 +156,7 @@ const QuestionForm = () => {
           type="submit"
           className="bg-orange-400 text-white px-4 py-2 rounded-md hover:bg-orange-500 transition-colors mb-10"
         >
-          Submit Question
+           {isEdit ? "Update Question" : "Submit Question"}
         </button>
       </div>
     </form>

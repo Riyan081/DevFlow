@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export const SigninSchema = z.object({
@@ -64,6 +65,41 @@ export const SignInWithOAuthSchema = z.object({
     image:z.string().url("Invalid image URL").optional(),
    })
 
+
+
    
 
 })
+
+export const AskQuestionSchema = z.object({
+  title: z
+    .string()
+    .min(1, { message: "Title is required" })
+    .min(10, { message: "Title must be at least 10 characters" })
+    .max(150, { message: "Title cannot be more than 150 characters" }),
+  content: z
+    .string()
+    .min(1, { message: "Content is required" })
+    .min(20, { message: "Content must be at least 20 characters" })
+    .max(5000, { message: "Content cannot be more than 5000 characters" }),
+  tags: z
+    .array(z.string().min(1, { message: "Tag cannot be empty" }))
+    .min(1, { message: "At least one tag is required" })
+    .max(5, { message: "You can add up to 5 tags" }),
+});
+
+
+
+export const EditQuestionSchema = AskQuestionSchema.extend({
+  questionId: z.string().min(1, { message: "Question ID is required" }),
+});
+
+export const GetQuestionSchema = z.object({
+  questionId: z.string().min(1, { message: "Question ID is required" }),
+});
+
+
+export const PaginationSearchSchema = z.object({
+  page: z
+    .string()
+    
