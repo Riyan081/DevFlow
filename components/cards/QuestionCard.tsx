@@ -4,6 +4,8 @@ import ROUTES from '@/constants/routes';
 import Link from 'next/link';
 import TagCard from './TagCard';
 import Image from 'next/image';
+import { Question } from '@/types/global';
+import avatar from '/public/icons/avatar.svg';
 
 interface Props {
   question: Question;
@@ -41,7 +43,7 @@ const QuestionCard = ({
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500 dark:text-gray-400">Asked by</span>
           <Image
-            src={author.image}
+            src={author.image || "/icons/avatar.svg"}
             width={32}
             height={32}
             alt="authorimg"

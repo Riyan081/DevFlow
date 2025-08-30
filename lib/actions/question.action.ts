@@ -1,14 +1,24 @@
 "use server";
-import mongoose, { Types } from "mongoose";
+import mongoose, { FilterQuery, Types } from "mongoose";
 import Question from "@/database/question.model";
 import Tag from "@/database/tag.model";
 import TagQuestion, { ITagQuestion } from "@/database/tag-question.model";
-import { CreateQuestionParams, EditQuestionParams, GetQuestionParams } from "@/types/global";
-import { AskQuestionSchema, GetQuestionSchema } from "../validations";
+import {
+  CreateQuestionParams,
+  EditQuestionParams,
+  GetQuestionParams,
+  PaginationSearchParams,
+} from "@/types/global";
+import {
+  AskQuestionSchema,
+  GetQuestionSchema,
+  PaginationSearchSchema,
+} from "../validations";
 import { ActionResponse } from "../handlers/fetch";
 import action from "../handlers/action";
 import User from "@/database/user.model"; // Add this import at the top
 import { EditQuestionSchema } from "@/lib/validations";
+import { Action } from "sonner";
 
 export async function createQuestion(
   params: CreateQuestionParams
@@ -118,21 +128,23 @@ export const editQuestion = async function (params: EditQuestionParams) {
   }
 
   const { title, content, tags, questionId } = validationResult.params!;
-  const userId = validationResult.session?.user?.id;
+  const userEmail = validationResult.session?.user?.email;
 
-  if (!userId) {
-    return { success: false, error: "Unauthorized" };
-  }
+  const user = await User.findOne({ email: userEmail });
+if (!user) {
+  return { success: false, error: "Unauthorized" };
+}
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
+
     const question = await Question.findById(questionId).session(session);
     if (!question) {
       return { success: false, error: "Question not found" };
     }
 
-    if (question.author.toString() !== userId) {
+    if (question.author.toString() !== user._id.toString()) {
       return {
         success: false,
         error: "You are not authorized to edit this question",
@@ -145,19 +157,25 @@ export const editQuestion = async function (params: EditQuestionParams) {
       await question.save({ session });
     }
 
-    const tagstoadd = tags.filter(
-      (tag) => !question.Tags.include(tag.toLowerCase())
-    );
-    const tagstoremove = question.Tags.filter(
-      (tag: string) => !tags.includes(tag.toLowerCase())
-    );
+   const tagstoadd = tags.filter(
+  (tag) =>
+    !question.tags
+      .map((t: mongoose.Types.ObjectId) => t.toString().toLowerCase())
+      .includes(tag.toLowerCase())
+);
+
+const tagstoremove = question.tags.filter(
+  (tagId: mongoose.Types.ObjectId) =>
+    !tags.includes(tagId.toString().toLowerCase())
+);
+
 
     const newTagDocuments = [];
 
     if (tagstoadd.length > 0) {
       for (const tag of tagstoadd) {
         const existingTag = await Tag.findOneAndUpdate(
-          { name: { $regex: new RegExp(`^${tag}$`, "i") } },
+          { name: { $regex: `^${tag}$`, $options: "i" } },
           { $setOnInsert: { name: tag }, $inc: { questions: 1 } },
           { new: true, upsert: true, session }
         );
@@ -195,15 +213,13 @@ export const editQuestion = async function (params: EditQuestionParams) {
       );
     }
 
-
-    if(newTagDocuments.length > 0){
+    if (newTagDocuments.length > 0) {
       await TagQuestion.insertMany(newTagDocuments, { session });
     }
 
     await question.save({ session });
     await session.commitTransaction();
     return { success: true, data: JSON.parse(JSON.stringify(question)) };
-
   } catch (e) {
     await session.abortTransaction();
     return {
@@ -215,8 +231,7 @@ export const editQuestion = async function (params: EditQuestionParams) {
   }
 };
 
-
-export async function getQuestion(params: GetQuestionParams){
+export async function getQuestion(params: GetQuestionParams) {
   const validationResult = await action({
     params,
     schema: GetQuestionSchema,
@@ -231,20 +246,93 @@ export async function getQuestion(params: GetQuestionParams){
   const userId = validationResult.session?.user?.id;
 
   if (!userId) {
-    return { success: false, error: "Unauthorized" }; 
-  }
-  
-  try{
-
-     const question = await Question.findById(questionId).populate('tags');
-      if(!question){
-        return { success: false, error: "Question not found" };
-      }
-      return { success: true, data: JSON.parse(JSON.stringify(question)) };
-
-
-  }catch(error){
-    return { success: false, error: (error as Error).message || "Failed to get question" };
+    return { success: false, error: "Unauthorized" };
   }
 
+  try {
+    const question = await Question.findById(questionId).populate("tags");
+    if (!question) {
+      return { success: false, error: "Question not found" };
+    }
+    return { success: true, data: JSON.parse(JSON.stringify(question)) };
+  } catch (error) {
+    return {
+      success: false,
+      error: (error as Error).message || "Failed to get question",
+    };
+  }
+}
+
+export async function getQuestions(
+  params: PaginationSearchParams
+): Promise<ActionResponse<{ questions: Question[]; isNext: boolean }>> {
+  const validationResult = await action({
+    params,
+    schema: PaginationSearchSchema,
+    authorize: false,
+  });
+
+  if (validationResult instanceof Error) {
+    return { success: false, error: { message: validationResult.message } };
+  }
+
+  const { page = 1, pageSize = 10, query, filter } = validationResult.params!;
+
+  const skip = (Number(page) - 1) * pageSize;
+  const limit = Number(pageSize) + 1; // Fetch one extra to check for next page
+
+  const filterQuery: FilterQuery<typeof Question> = {};
+
+  if (filter === "recommended") {
+    return { success: true, data: { questions: [], isNext: false } };
+  }
+
+  if (query) {
+    filterQuery.$or = [
+      { title: { $regex: new RegExp(query, "i") } },
+      { content: { $regex: new RegExp(query, "i") } },
+    ];
+  }
+
+  let sortCriteria = {};
+
+  switch (filter) {
+    case "newest":
+      sortCriteria = { createdAt: -1 };
+      break;
+    case "unanswered":
+      filterQuery.answers = 0;
+      sortCriteria = { createdAt: -1 };
+      break;
+
+    case "popular":
+      sortCriteria = { upvotes: -1 };
+      break;
+
+    default:
+      sortCriteria = { createdAt: -1 };
+      break;
+  }
+  try {
+    const totalQuestions = await Question.countDocuments(filterQuery);
+    const questions = await Question.find(filterQuery)
+      .populate("tags", "name")
+      .populate("author", "name image")
+      .lean()
+      .sort(sortCriteria)
+      .skip(skip)
+      .limit(limit);
+
+    const isNext = totalQuestions > skip + questions.length;
+
+    return {
+      success: true,
+      data: { questions: JSON.parse(JSON.stringify(questions)), isNext },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: { message: (error as Error).message || "Failed to get questions" },
+    };
+  }
 }
