@@ -59,6 +59,8 @@ export const getTags = async(params:PaginationSearchParams)=>{
       .sort(sortCriteria)
       .skip(skip)
       .limit(limit)
+      .lean();
+      
       
 
       const isNext = totalTags > skip + tags.length;
