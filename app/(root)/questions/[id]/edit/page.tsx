@@ -3,7 +3,6 @@ import { auth } from "@/auth";
 import { notFound, redirect } from "next/navigation";
 import QuestionForm from "@/components/forms/QuestionForm";
 import { getQuestion } from "@/lib/actions/question.action";
-// import { User } from 'lucide-react';
 import User from "@/database/user.model";
 
 const EditQuestion = async ({
@@ -13,21 +12,35 @@ const EditQuestion = async ({
 }) => {
   const params = await paramsPromise;
   const session = await auth();
-  if (!session) return redirect("/sign-in");
+  if (!session) {
+    console.error("No session found. Redirecting to sign-in.");
+    return redirect("/sign-in");
+  }
 
   const { id } = params;
-  if (!id) return redirect("/");
+  if (!id) {
+    console.error("No question ID provided. Redirecting to home.");
+    return redirect("/");
+  }
 
   const { data: question, success } = await getQuestion({ questionId: id });
-  if (!success || !question) return notFound();
-  console.log("question.author:", question.author.toString());
+  if (!success || !question) {
+    console.error("Question not found or fetch failed. Showing 404.");
+    return notFound();
+  }
+  console.log("question.author:", question.author?.toString?.());
   console.log("session user id:", session?.user?.id);
 
   const dbUser = await User.findOne({ email: session?.user?.email });
-  if (!dbUser) return redirect("/sign-in");
+  if (!dbUser) {
+    console.error("User not found in database. Redirecting to sign-in.");
+    return redirect("/sign-in");
+  }
 
-  if (question.author.toString() !== dbUser._id.toString())
-    return redirect(`/questions/${id}`);
+if (question.author?._id?.toString() !== dbUser._id.toString()) {
+  console.warn("User is not the author. Redirecting to question page.");
+  return redirect(`/questions/${id}`);
+}
   return (
     <main>
       <QuestionForm question={question} isEdit />

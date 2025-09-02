@@ -7,11 +7,13 @@ import {
   CreateQuestionParams,
   EditQuestionParams,
   GetQuestionParams,
+  IncrementViewParams,
   PaginationSearchParams,
 } from "@/types/global";
 import {
   AskQuestionSchema,
   GetQuestionSchema,
+  IncrementViewSchema,
   PaginationSearchSchema,
 } from "../validations";
 import { ActionResponse } from "../handlers/fetch";
@@ -19,6 +21,7 @@ import action from "../handlers/action";
 import User from "@/database/user.model"; // Add this import at the top
 import { EditQuestionSchema } from "@/lib/validations";
 import { Action } from "sonner";
+import { revalidatePath } from "next/cache";
 
 export async function createQuestion(
   params: CreateQuestionParams
@@ -131,14 +134,13 @@ export const editQuestion = async function (params: EditQuestionParams) {
   const userEmail = validationResult.session?.user?.email;
 
   const user = await User.findOne({ email: userEmail });
-if (!user) {
-  return { success: false, error: "Unauthorized" };
-}
+  if (!user) {
+    return { success: false, error: "Unauthorized" };
+  }
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-
     const question = await Question.findById(questionId).session(session);
     if (!question) {
       return { success: false, error: "Question not found" };
@@ -157,18 +159,17 @@ if (!user) {
       await question.save({ session });
     }
 
-   const tagstoadd = tags.filter(
-  (tag) =>
-    !question.tags
-      .map((t: mongoose.Types.ObjectId) => t.toString().toLowerCase())
-      .includes(tag.toLowerCase())
-);
+    const tagstoadd = tags.filter(
+      (tag) =>
+        !question.tags
+          .map((t: mongoose.Types.ObjectId) => t.toString().toLowerCase())
+          .includes(tag.toLowerCase())
+    );
 
-const tagstoremove = question.tags.filter(
-  (tagId: mongoose.Types.ObjectId) =>
-    !tags.includes(tagId.toString().toLowerCase())
-);
-
+    const tagstoremove = question.tags.filter(
+      (tagId: mongoose.Types.ObjectId) =>
+        !tags.includes(tagId.toString().toLowerCase())
+    );
 
     const newTagDocuments = [];
 
@@ -250,7 +251,10 @@ export async function getQuestion(params: GetQuestionParams) {
   }
 
   try {
-    const question = await Question.findById(questionId).populate("tags").populate("author", "name image").lean();
+    const question = await Question.findById(questionId)
+      .populate("tags")
+      .populate("author", "name image")
+      .lean();
     if (!question) {
       return { success: false, error: "Question not found" };
     }
@@ -293,7 +297,7 @@ export async function getQuestions(
       { content: { $regex: new RegExp(query, "i") } },
     ];
   }
-
+ 
   let sortCriteria = {};
 
   switch (filter) {
@@ -337,9 +341,43 @@ export async function getQuestions(
   }
 }
 
+export async function incrementView(params: IncrementViewParams) {
+  const validationResult = await action({
+    params,
+    schema: IncrementViewSchema,
+    authorize: false,
+  });
+
+  if (validationResult instanceof Error) {
+    return { success: false, error: validationResult.message };
+  }
+
+  const { questionId } = validationResult.params!;
+
+  try {
+    const question = await Question.findByIdAndUpdate(
+      questionId,
+      {
+        $inc: { views: 1 },
+      },
+      { new: true }
+    );
+
+    
+    
 
 
+    if (!question) {
+      return { success: false, error: "Question not found" };
+    }
 
-export async function incrementView(params:IncrementViewParams){
-  
+    return { success: true, data: null };
+  } catch (e) {
+    return {
+      success: false,
+      error: (e as Error).message || "Failed to increment view count",
+    };
+  }
 }
+
+

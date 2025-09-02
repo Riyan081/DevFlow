@@ -5,10 +5,12 @@ import Image from "next/image";
 import { formatNumber, getTimeStamp } from "@/lib/utils";
 import TagCard from "@/components/cards/TagCard";
 import Preview from "@/components/editor/Preview";
-import { getQuestion } from "@/lib/actions/question.action";
+import { getQuestion, incrementView } from "@/lib/actions/question.action";
+import { after } from "next/server";
+import AnswerForm from "@/components/forms/AnswerForm";
+
 //npm install next-mdx-remote
 //npm install bright
-
 
 // const questions = [
 //   {
@@ -55,9 +57,31 @@ const QuestionDetails = async ({
 }) => {
   const params = await paramsPromise;
   const { id } = params;
-  const {success,data:question} = await getQuestion({
+  // const [_, { success, data: question }] = await Promise.all([
+  //   await incrementView({ questionId: id }),
+  //   await getQuestion({
+  //     questionId: id,
+  //   }),
+  // ]);
+  //this is called parallel request saves time and good for performance
+  //we can only perform this when both request are independent of each other
+  //if one request is dependent on other then we have to call them sequentially
+
+
+  //after
+  // its runs async after the response is sent to the client
+  //dosent affect response time experienced by the client 
+  // its useful for tasks that dont need to block the response such as logging analytics or cleanup operation.
+
+
+  const { success, data: question } = await getQuestion({
     questionId: id,
   });
+
+  after(async()=>{
+    await incrementView({ questionId: id })
+  })
+//so the swquence is first getquestion will be called then response will send to user like question show hoga uske bad after call hoga for view increment then view increment hoga
 
 
 
@@ -65,8 +89,7 @@ const QuestionDetails = async ({
     return <div>Question not found</div>;
   }
 
-  const {author,createdAt,answers,views,tags,content,title} = question;
-
+  const { author, createdAt, answers, views, tags, content, title } = question;
 
   return (
     <>
@@ -93,60 +116,57 @@ const QuestionDetails = async ({
         </div>
 
         <h2 className="font-semibold text-amber-50 mt-3 w-full">{title}</h2>
-
-
       </div>
       <div className="mb-8 mt-5 flex flex-wrap gap-4">
-          <div>
-            <Image
+        <div>
+          <Image
             src="/icons/clock.svg"
             alt="Clock Icon"
             width={16}
             height={16}
             className="inline-block mr-1"
-            
-            
-            />
-            <span className="text-sm text-amber-50">{getTimeStamp(new Date(createdAt))}</span>
-          </div>
-          <div>
-            <Image
+          />
+          <span className="text-sm text-amber-50">
+            {getTimeStamp(new Date(createdAt))}
+          </span>
+        </div>
+        <div>
+          <Image
             src="/icons/message.svg"
             alt="Clock Icon"
             width={16}
             height={16}
             className="inline-block mr-1"
-            
-            
-            />
-            <span className="text-sm text-amber-50">{answers}</span>
-          </div>
-          <div>
-            <Image
+          />
+          <span className="text-sm text-amber-50">{answers}</span>
+        </div>
+        <div>
+          <Image
             src="/icons/eye.svg"
             alt="Clock Icon"
             width={16}
             height={16}
             className="inline-block mr-1"
-            
-            
-            />
-            <span className="text-sm text-amber-50">{formatNumber(views)}</span>
-          </div>
+          />
+          <span className="text-sm text-amber-50">{formatNumber(views)}</span>
+        </div>
       </div>
 
-      <Preview content={content}/>
+      <Preview content={content} />
       <div className="mt-8 flex flex-wrap gap-2">
-        {
-          tags.map((tag) => (
-           <TagCard key={tag._id} {...tag} isPage={false} />
-          ))
-        }
-
-
+        {tags.map((tag) => (
+          <TagCard key={tag._id} {...tag} isPage={false} />
+        ))}
       </div>
+      <section className="my-5">
+        <AnswerForm questionId={question._id}/>
+
+
+      </section>
     </>
   );
 };
 
 export default QuestionDetails;
+
+

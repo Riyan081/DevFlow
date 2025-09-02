@@ -111,3 +111,19 @@ export const PaginationSearchSchema = z.object({
 export const getTagQuestionsSchema = PaginationSearchSchema.extend({
   tagId: z.string().min(1,{message:"Tag ID is required  "})
 })
+
+
+export const IncrementViewSchema = z.object({
+  questionId: z.string().min(1, { message: "Question ID is required" }),
+})
+
+
+
+export const AnswerSchema = z.object({
+   content:z.string().min(50,{message:"Answer must be at least 50 characters"}).max(5000,{message:"Answer cannot be more than 5000 characters"}),
+})
+
+
+export const AnswerServerSchema = AnswerSchema.extend({
+  questionId:z.string().min(1,{message:"Question ID is required"})
+})
