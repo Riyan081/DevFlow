@@ -1,5 +1,5 @@
 import React from "react";
-import { getTags } from "@/lib/actions/tag.actions";
+import { getTags } from "@/lib/actions/tag.action";
 import LocalSearch from "@/components/search/LocalSearch";
 import QuestionCard from "@/components/cards/QuestionCard";
 import TagCard from "@/components/cards/TagCard";

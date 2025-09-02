@@ -2,8 +2,9 @@ import React from 'react'
 import Link from 'next/link'
 import { Avatar, AvatarFallback } from '../ui/avatar'
 import Image from 'next/image'
+import { cn } from '@/lib/utils'
 
-const UserAvtar = ({id,name,imageUrl}:{id:string,name:string,imageUrl:string}) => {
+const UserAvtar = ({id,name,imageUrl,fallbackClassName,className}:{id:string,name:string,imageUrl:string,fallbackClassName?:string,className?:string}) => {
     const initials = name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0,2);
   return (
     <div>
@@ -20,7 +21,7 @@ const UserAvtar = ({id,name,imageUrl}:{id:string,name:string,imageUrl:string}) =
              
              />
             ):(
-              <AvatarFallback className="text-white bg-gradient-to-r from-orange-500 to-orange-400 tracking-wider font-bold">
+              <AvatarFallback className={cn("text-white bg-gradient-to-r from-orange-500 to-orange-400 tracking-wider font-bold",fallbackClassName)}>
                 {initials}
               </AvatarFallback>
             )

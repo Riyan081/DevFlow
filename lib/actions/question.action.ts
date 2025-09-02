@@ -250,7 +250,7 @@ export async function getQuestion(params: GetQuestionParams) {
   }
 
   try {
-    const question = await Question.findById(questionId).populate("tags");
+    const question = await Question.findById(questionId).populate("tags").populate("author", "name image").lean();
     if (!question) {
       return { success: false, error: "Question not found" };
     }
@@ -335,4 +335,11 @@ export async function getQuestions(
       error: { message: (error as Error).message || "Failed to get questions" },
     };
   }
+}
+
+
+
+
+export async function incrementView(params:IncrementViewParams){
+  
 }
