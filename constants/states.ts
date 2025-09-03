@@ -47,3 +47,12 @@ export const EMPTY_COLLECTION = {
         href:"/collections"
     }
 }
+
+export const EMPTY_ANSWERS = {
+    title:"No Answers Yet",
+    message:"Be the first to answer this question and share your knowledge with the community!",
+    button:{
+        text:"Answer Question",
+        href:"/"
+    }
+}

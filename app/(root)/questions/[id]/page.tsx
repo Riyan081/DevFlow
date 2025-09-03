@@ -8,6 +8,8 @@ import Preview from "@/components/editor/Preview";
 import { getQuestion, incrementView } from "@/lib/actions/question.action";
 import { after } from "next/server";
 import AnswerForm from "@/components/forms/AnswerForm";
+import { GetAnswers } from "@/lib/actions/answer.action";
+import Allanswers from "@/components/answers/Allanswers";
 
 //npm install next-mdx-remote
 //npm install bright
@@ -88,7 +90,11 @@ const QuestionDetails = async ({
   if (!success || !question) {
     return <div>Question not found</div>;
   }
+  
 
+  //changing names coz of duplicate names
+  const {success:aanswers,data:answerResult,error:answerError} = await GetAnswers({questionId:id,page:1,pageSize:10,filter:'latest'});
+  console.log("answerResult",answerResult);
   const { author, createdAt, answers, views, tags, content, title } = question;
 
   return (
@@ -158,6 +164,15 @@ const QuestionDetails = async ({
           <TagCard key={tag._id} {...tag} isPage={false} />
         ))}
       </div>
+
+      <section>
+        <Allanswers
+        data={answerResult?.answers}
+        success={aanswers}
+        error={answerError}
+        totalAnswers = {answerResult?.totalAnswers || 0}
+        />
+      </section>
       <section className="my-5">
         <AnswerForm questionId={question._id}/>
 
@@ -168,5 +183,7 @@ const QuestionDetails = async ({
 };
 
 export default QuestionDetails;
+
+
 
 

@@ -83,3 +83,14 @@ interface CreateAnsewerParams{
 }
 
 
+interface GetAnswersParams extends PaginationSearchParams{
+  questionId:string;
+}
+
+
+interface Answer{
+  _id:string;
+  content:string;
+  author:Author;
+  createdAt:Date;
+}
