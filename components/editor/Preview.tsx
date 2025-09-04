@@ -19,4 +19,4 @@ const Preview = ({content=""}:{content:string}) => {
   )
 }
 
-export default Preview
+export default Preview 

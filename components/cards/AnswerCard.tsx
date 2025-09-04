@@ -1,9 +1,9 @@
-import React from 'react';
-import { Answer } from '@/types/global';
-import UserAvtar from '../avtar/UserAvtar';
-import Link from 'next/link';
-import { getTimeStamp } from '@/lib/utils';
-import Preview from '../editor/Preview';
+import React from "react";
+import { Answer } from "@/types/global";
+import UserAvtar from "../avtar/UserAvtar";
+import Link from "next/link";
+import { getTimeStamp } from "@/lib/utils";
+import Preview from "../editor/Preview";
 
 const AnswerCard = ({ _id, author, content, createdAt }: Answer) => {
   return (
@@ -33,9 +33,30 @@ const AnswerCard = ({ _id, author, content, createdAt }: Answer) => {
           </p>
         </div>
         <div className="flex justify-end text-xs text-gray-400 mb-2">Votes</div>
+        
+        {/* ✅ CSS-only collapsible content */}
         <div className="w-full max-w-full break-all">
-  <Preview content={content} />
-</div>
+          <details className="group">
+            <summary className="cursor-pointer list-none">
+              <div className="max-h-80 overflow-hidden relative">
+                <Preview content={content} />
+                {/* Fade gradient overlay */}
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none group-open:hidden" />
+              </div>
+              <div className="mt-2 text-orange-400 hover:text-orange-300 text-sm font-medium group-open:hidden">
+                Read More ↓
+              </div>
+            </summary>
+            
+            {/* Full content when expanded */}
+            <div className="group-open:block">
+              <Preview content={content} />
+              <div className="mt-2 text-orange-400 hover:text-orange-300 text-sm font-medium">
+                Show Less ↑
+              </div>
+            </div>
+          </details>
+        </div>
       </div>
     </article>
   );

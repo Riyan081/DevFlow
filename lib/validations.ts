@@ -120,7 +120,7 @@ export const IncrementViewSchema = z.object({
 
 
 export const AnswerSchema = z.object({
-   content:z.string().min(50,{message:"Answer must be at least 50 characters"}).max(5000,{message:"Answer cannot be more than 5000 characters"}),
+   content:z.string()
 })
 
 

@@ -7,6 +7,8 @@ import { AnswerSchema } from "@/lib/validations";
 import { createAnswer } from "@/lib/actions/answer.action";
 import Image from "next/image";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { api } from "@/lib/api";
 
 const Editor = dynamic(() => import("../editor"), { ssr: false });
 
@@ -17,29 +19,77 @@ function autoFenceIfLooksLikeCode(input: string) {
   );
 
   // Wrap if looks like code and isn’t already fenced
-  if (looksLikeCode && !input.trim().startsWith("```")) {
-    return "```tsx\n" + input.trim() + "\n```";
+  if (looksLikeCode && !input.trim().startsWith("")) {
+    return "tsx\n" + input.trim() + "\n```";
   }
 
   return input;
 }
 
-const AnswerForm = ({ questionId }: { questionId: string }) => {
+const AnswerForm = ({ questionId, questionTitle, questionContent }: { questionId: string, questionTitle: string, questionContent: string }) => {
+
+  console.log("=== AnswerForm Props ===");
+  console.log("questionId:", questionId);
+  console.log("questionTitle:", questionTitle);
+  console.log("questionContent:", questionContent);
+  console.log("questionTitle length:", questionTitle?.length);
+  console.log("questionContent length:", questionContent?.length);
+  
   const editorRef = useRef<MDXEditorMethods>(null);
   const [editorValue, setEditorValue] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [isAISubmitting, setIsAISubmitting] = useState(false);
   const [isAnswer, startAnsweringTransition] = useTransition();
+  const session = useSession();
 
   // Dummy AI handler
-  const handleAIGenerate = async () => {
-    setIsAISubmitting(true);
-    setTimeout(() => {
-      setEditorValue("This is an AI generated answer example.");
-      setIsAISubmitting(false);
-    }, 1500);
-  };
+ const handleAIGenerate = async () => {
+  if(session.status !== "authenticated") {
+    toast.error("You must be logged in to use AI generation.");
+    return;
+  }
+  
+  setIsAISubmitting(true);
+  
+  try {
+    // Direct fetch instead of using api.ai.getAnswer
+    const response = await fetch('/api/ai/answers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        question: questionTitle,
+        content: questionContent
+      })
+    });
+
+    const result = await response.json();
+    console.log("Direct fetch result:", result);
+
+    if(!result.success){
+      toast.error(`Failed to generate AI answer: ${result.error || 'Unknown error'}`);
+      return;
+    }
+
+    let formattedAnswer = result.data.replace(/<br>/g," ").toString().trim();
+    formattedAnswer = autoFenceIfLooksLikeCode(formattedAnswer);
+    
+    if(editorRef.current){
+      editorRef.current.setMarkdown(formattedAnswer);
+      setEditorValue(formattedAnswer);
+    }
+
+    toast.success("AI answer generated. Please review and submit.");
+
+  } catch(error){
+    console.error("Direct fetch error:", error);
+    toast.error("Failed to generate AI answer.");
+  } finally{
+    setIsAISubmitting(false);
+  }
+};
 
   const handleSubmit = async (e: React.FormEvent) => {
     startAnsweringTransition(async () => {
@@ -47,8 +97,6 @@ const AnswerForm = ({ questionId }: { questionId: string }) => {
       setError("");
 
       let markdown = editorRef.current?.getMarkdown() || editorValue;
-
-      // ✅ Auto-wrap code if raw
       markdown = autoFenceIfLooksLikeCode(markdown);
 
       if (!AnswerSchema.safeParse({ content: markdown }).success) {

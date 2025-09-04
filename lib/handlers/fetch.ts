@@ -22,7 +22,7 @@ function isError(error:unknown): error is Error{
 }
 
 export async function fetchHandler<T>(url:string, options: FetchOptions={}):Promise<ActionResponse<T>>{
- const {timeout =5000,headers:custmHeaders={},...restOptions} = options;
+ const {timeout =500000000,headers:custmHeaders={},...restOptions} = options;
 
     const controller = new AbortController();
     const id = setTimeout(()=>{

@@ -3,6 +3,96 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Dark mode markdown preview */
+[data-color-mode="dark"] .wmde-markdown {
+  background-color: transparent !important;
+  color: #e6edf3;
+}
+
+[data-color-mode="dark"] .wmde-markdown h1,
+[data-color-mode="dark"] .wmde-markdown h2,
+[data-color-mode="dark"] .wmde-markdown h3,
+[data-color-mode="dark"] .wmde-markdown h4,
+[data-color-mode="dark"] .wmde-markdown h5,
+[data-color-mode="dark"] .wmde-markdown h6 {
+  color: #f0f6fc;
+  border-bottom-color: #21262d;
+}
+
+[data-color-mode="dark"] .wmde-markdown code {
+  background-color: #161b22;
+  color: #e6edf3;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 85%;
+}
+
+[data-color-mode="dark"] .wmde-markdown pre {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 16px;
+  overflow: auto;
+}
+
+[data-color-mode="dark"] .wmde-markdown pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+[data-color-mode="dark"] .wmde-markdown blockquote {
+  border-left: 4px solid #30363d;
+  color: #8b949e;
+  margin: 0;
+  padding: 0 16px;
+}
+
+[data-color-mode="dark"] .wmde-markdown table {
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+[data-color-mode="dark"] .wmde-markdown table tr {
+  background-color: transparent;
+  border-top: 1px solid #21262d;
+}
+
+[data-color-mode="dark"] .wmde-markdown table td,
+[data-color-mode="dark"] .wmde-markdown table th {
+  border: 1px solid #30363d;
+  padding: 6px 13px;
+}
+
+[data-color-mode="dark"] .wmde-markdown table th {
+  background-color: #161b22;
+  font-weight: 600;
+}
+
+/* Syntax highlighting for code blocks */
+[data-color-mode="dark"] .wmde-markdown .token.comment {
+  color: #8b949e;
+}
+
+[data-color-mode="dark"] .wmde-markdown .token.keyword {
+  color: #ff7b72;
+}
+
+[data-color-mode="dark"] .wmde-markdown .token.string {
+  color: #a5d6ff;
+}
+
+[data-color-mode="dark"] .wmde-markdown .token.function {
+  color: #d2a8ff;
+}
+
+[data-color-mode="dark"] .wmde-markdown .token.number {
+  color: #79c0ff;
+}
+
+[data-color-mode="dark"] .wmde-markdown .token.operator {
+  color: #ff7b72;
+}
+
 @theme inline {
   --background-image-auth-dark:url('/images/auth-dark.png');
   --background-image-auth-light:url('/images/auth-light.png');

@@ -174,7 +174,7 @@ const QuestionDetails = async ({
         />
       </section>
       <section className="my-5">
-        <AnswerForm questionId={question._id}/>
+        <AnswerForm questionId={question._id} questionTitle={question.title} questionContent={question.content}/>
 
 
       </section>

@@ -1,14 +1,54 @@
 import { AIAnswerSchema } from "@/lib/validations";
 import { NextResponse } from "next/server";
 
+// ✅ Helper function to sanitize markdown content
+function sanitizeMarkdownContent(content: string): string {
+  let sanitized = content;
+
+  // Fix unclosed code blocks
+  const codeBlockMatches = sanitized.match(/```/g);
+  if (codeBlockMatches && codeBlockMatches.length % 2 !== 0) {
+    sanitized += '\n```'; // Close unclosed code block
+  }
+
+  // Ensure code blocks have language identifiers
+  sanitized = sanitized.replace(/```\n(?!```)/g, '```text\n');
+  
+  // Remove problematic characters
+  sanitized = sanitized
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '') // Control chars
+    .replace(/\r\n/g, '\n') // Normalize line endings
+    .replace(/<br\s*\/?>/gi, '\n') // Replace <br> with newlines
+    .trim();
+
+  // Wrap raw JSX/HTML in code blocks
+  if (/^<[\s\S]*>$/m.test(sanitized.trim())) {
+    sanitized = `\`\`\`jsx\n${sanitized}\n\`\`\``;
+  }
+
+  return sanitized;
+}
+
 export async function POST(req: Request) {
-  const { question, content } = await req.json();
   try {
+    const { question, content } = await req.json();
+    
+    console.log("API received:", { question, content });
+    
     const validatedData = AIAnswerSchema.safeParse({ question, content });
     if (!validatedData.success) {
+      console.error("Validation failed:", validatedData.error.flatten());
+      
       return new Response(
-        JSON.stringify({ error: validatedData.error.flatten().fieldErrors }),
-        { status: 400 }
+        JSON.stringify({ 
+          success: false,
+          error: "Validation failed",
+          details: validatedData.error.flatten().fieldErrors 
+        }),
+        { 
+          status: 400,
+          headers: { "Content-Type": "application/json" }
+        }
       );
     }
 
@@ -16,14 +56,25 @@ export async function POST(req: Request) {
     const messages = [
       {
         role: "system",
-        content: `You are a helpful assistant that provides informative responses in markdown format. 
-- Use proper markdown syntax for headings, lists, and emphasis.  
-- For all code snippets, ALWAYS wrap them in fenced code blocks with triple backticks and a language identifier.  
-- Example: 
-\`\`\`jsx
-import React from "react";
-\`\`\`
-- Never output raw JSX/HTML outside of fenced code blocks.`,
+        content: `You are a helpful assistant that provides informative responses in markdown format.
+
+CRITICAL RULES:
+- ALWAYS use proper markdown syntax
+- For code blocks, ALWAYS use \`\`\`language and close with \`\`\`
+- NEVER leave code blocks unclosed
+- ALWAYS specify a language identifier (js, jsx, css, html, python, etc.)
+- Examples:
+  \`\`\`jsx
+  import React from "react";
+  \`\`\`
+  
+  \`\`\`css
+  .button { color: red; }
+  \`\`\`
+
+- NEVER output raw HTML/JSX outside of fenced code blocks
+- Use headings (#, ##, ###) for structure
+- Use lists (-, 1.) for organization`,
       },
       {
         role: "user",
@@ -49,25 +100,51 @@ import React from "react";
     const data = await response.json();
 
     if (!response.ok) {
+      console.error("OpenRouter error:", data);
       return new Response(
-        JSON.stringify({ error: data.error || "OpenRouter error" }),
-        { status: response.status }
+        JSON.stringify({ 
+          success: false,
+          error: data.error?.message || data.error || "OpenRouter API error" 
+        }),
+        { 
+          status: response.status,
+          headers: { "Content-Type": "application/json" }
+        }
       );
     }
 
-    // Extract the answer from OpenRouter's response
+    // ✅ Enhanced post-processing with sanitization
     let answer = data.choices?.[0]?.message?.content || "";
 
-    // ✅ Post-processing safety net: wrap raw JSX/HTML in fenced code block
-    if (/^<[\s\S]*>$/m.test(answer.trim())) {
-      answer = `\`\`\`jsx\n${answer}\n\`\`\``;
+    if (!answer) {
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: "No response generated from AI" 
+        }),
+        { 
+          status: 500,
+          headers: { "Content-Type": "application/json" }
+        }
+      );
     }
 
+    // ✅ Enhanced sanitization and validation
+    answer = sanitizeMarkdownContent(answer);
+
     return NextResponse.json({ success: true, data: answer }, { status: 200 });
+    
   } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-    });
+    console.error("API route error:", err);
+    return new Response(
+      JSON.stringify({ 
+        success: false,
+        error: "Internal Server Error" 
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
   }
 }
