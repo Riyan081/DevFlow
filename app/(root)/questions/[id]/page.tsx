@@ -10,6 +10,7 @@ import { after } from "next/server";
 import AnswerForm from "@/components/forms/AnswerForm";
 import { GetAnswers } from "@/lib/actions/answer.action";
 import Allanswers from "@/components/answers/Allanswers";
+import Votes from "@/components/votes/votes";
 
 //npm install next-mdx-remote
 //npm install bright
@@ -117,7 +118,7 @@ const QuestionDetails = async ({
             </Link>
           </div>
           <div className="flex justify-end">
-            <p>Votes</p>
+         <Votes upvotes={question.upvotes} hasupVoted={true}  downvotes={question.downvotes} hasdownVoted={false} questionId={question._id} />
           </div>
         </div>
 

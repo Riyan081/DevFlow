@@ -19,6 +19,7 @@ interface Question {
   author: Author;
   createdAt: Date;
   upvotes: number;
+  downvotes: number;
   answers: number;
   views: number;
 }
@@ -93,4 +94,18 @@ interface Answer{
   content:string;
   author:Author;
   createdAt:Date;
+}
+
+interface CreateVoteParams{
+  targetId:string;
+  targetType:"question" | "answer";
+  voteType:"upvote" | "downvote";
+ 
+
+
+}
+interface UpdateVoteCountParams extends CreateVoteParams{
+
+ change : 1 | -1;
+ 
 }
