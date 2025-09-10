@@ -1,5 +1,5 @@
 import UserAvtar from "@/components/avtar/UserAvtar";
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { formatNumber, getTimeStamp } from "@/lib/utils";
@@ -11,6 +11,7 @@ import AnswerForm from "@/components/forms/AnswerForm";
 import { GetAnswers } from "@/lib/actions/answer.action";
 import Allanswers from "@/components/answers/Allanswers";
 import Votes from "@/components/votes/votes";
+import { hasVoted } from "@/lib/actions/vote.action";
 
 //npm install next-mdx-remote
 //npm install bright
@@ -70,32 +71,37 @@ const QuestionDetails = async ({
   //we can only perform this when both request are independent of each other
   //if one request is dependent on other then we have to call them sequentially
 
-
   //after
   // its runs async after the response is sent to the client
-  //dosent affect response time experienced by the client 
+  //dosent affect response time experienced by the client
   // its useful for tasks that dont need to block the response such as logging analytics or cleanup operation.
-
 
   const { success, data: question } = await getQuestion({
     questionId: id,
   });
 
-  after(async()=>{
-    await incrementView({ questionId: id })
-  })
-//so the swquence is first getquestion will be called then response will send to user like question show hoga uske bad after call hoga for view increment then view increment hoga
-
-
+  after(async () => {
+    await incrementView({ questionId: id });
+  });
+  //so the swquence is first getquestion will be called then response will send to user like question show hoga uske bad after call hoga for view increment then view increment hoga
 
   if (!success || !question) {
     return <div>Question not found</div>;
   }
-  
 
   //changing names coz of duplicate names
-  const {success:aanswers,data:answerResult,error:answerError} = await GetAnswers({questionId:id,page:1,pageSize:10,filter:'latest'});
-  console.log("answerResult",answerResult);
+  const {
+    success: aanswers,
+    data: answerResult,
+    error: answerError,
+  } = await GetAnswers({
+    questionId: id,
+    page: 1,
+    pageSize: 10,
+    filter: "latest",
+  });
+  console.log("answerResult", answerResult);
+  const hasVotedPromise = hasVoted({ targetId: id, targetType: "question" });
   const { author, createdAt, answers, views, tags, content, title } = question;
 
   return (
@@ -118,7 +124,15 @@ const QuestionDetails = async ({
             </Link>
           </div>
           <div className="flex justify-end">
-         <Votes upvotes={question.upvotes} hasupVoted={true}  downvotes={question.downvotes} hasdownVoted={false} questionId={question._id} />
+            <Suspense fallback={<div>Loading...</div>}>
+              <Votes
+                upvotes={question.upvotes}
+                downvotes={question.downvotes}
+                targetType="question"
+                targetId={question._id} // ✅ This is correct
+                hasVotedPromise={hasVotedPromise}
+              />
+            </Suspense>
           </div>
         </div>
 
@@ -168,23 +182,21 @@ const QuestionDetails = async ({
 
       <section>
         <Allanswers
-        data={answerResult?.answers}
-        success={aanswers}
-        error={answerError}
-        totalAnswers = {answerResult?.totalAnswers || 0}
+          data={answerResult?.answers}
+          success={aanswers}
+          error={answerError}
+          totalAnswers={answerResult?.totalAnswers || 0}
         />
       </section>
       <section className="my-5">
-        <AnswerForm questionId={question._id} questionTitle={question.title} questionContent={question.content}/>
-
-
+        <AnswerForm
+          questionId={question._id}
+          questionTitle={question.title}
+          questionContent={question.content}
+        />
       </section>
     </>
   );
 };
 
 export default QuestionDetails;
-
-
-
-

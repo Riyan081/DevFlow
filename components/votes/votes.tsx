@@ -1,26 +1,36 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import Image from "next/image";
 import { formatNumber } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { ActionResponse } from "@/lib/handlers/fetch";
+import { HasVotedParams, HasVotedResponse } from "@/types/global";
+import { createVote } from "@/lib/actions/vote.action";
 
 interface Params {
+  targetType: "question" | "answer";
   upvotes: number;
   downvotes: number;
-  hasupVoted?: boolean;
-  hasdownVoted?: boolean;
-  questionId?: string;
+  targetId?: string;
+
+  hasVotedPromise: Promise<ActionResponse<HasVotedResponse>>;
+
 }
 const Votes = ({
+  targetType,
+  targetId,
   upvotes,
   downvotes,
-  hasdownVoted,
-  hasupVoted,
-  questionId,
+
+  hasVotedPromise
 }: Params) => {
+ const {success,data} = use(hasVotedPromise) || {};
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const {hasUpvoted,hasDownvoted} = data || {};
   const session = useSession();
 
   const userMail = session?.data?.user?.email || "";
@@ -30,15 +40,25 @@ const Votes = ({
               
     const userId = user?.data?._id;
     if (!userId) {
-      return toast("Question ID is missing");
+      return toast("User ID is missing");
     }
 
     setIsLoading(true);
     try {
+      const result = await createVote({
+        targetId: targetId!,
+        targetType,
+        voteType: type,
+        
+      })
+
+      if(!result.success){
+        return toast(result.error || "Failed to process your vote. Please try again later.");
+      }
       const sucessMessage =
         type === "upvote"
-          ? ` Upvote ${!hasupVoted ? "Added" : "Removed"}`
-          : ` Downvote ${!hasdownVoted ? "Added" : "Removed"}`;
+          ? ` Upvote ${!hasUpvoted ? "Added" : "Removed"}`
+          : ` Downvote ${!hasDownvoted ? "Added" : "Removed"}`;
     } catch (err) {
       toast(
         "Failed to load an error occured while loading. Please Try Again Later"
@@ -51,7 +71,7 @@ const Votes = ({
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-1.5">
         <Image
-          src={hasupVoted ? "/icons/upvoted.svg" : "/icons/upvote.svg"}
+          src={ success && hasUpvoted ? "/icons/upvoted.svg" : "/icons/upvote.svg"}
           alt="Upvote Icon"
           height={18}
           width={18}
@@ -65,7 +85,7 @@ const Votes = ({
       </div>
       <div className="flex items-center gap-1.5">
         <Image
-          src={hasdownVoted ? "/icons/downvoted.svg" : "/icons/downvote.svg"}
+          src={ success && hasDownvoted ? "/icons/downvoted.svg" : "/icons/downvote.svg"}
           alt="Downvote Icon"
           height={18}
           width={18}
