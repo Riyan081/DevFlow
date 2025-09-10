@@ -4,11 +4,22 @@ import UserAvtar from "../avtar/UserAvtar";
 import Link from "next/link";
 import { getTimeStamp } from "@/lib/utils";
 import Preview from "../editor/Preview";
+import Votes from "../votes/votes";
+import { hasVoted } from "@/lib/actions/vote.action";
+import { Suspense } from "react";
 
-const AnswerCard = ({ _id, author, content, createdAt }: Answer) => {
+const AnswerCard = ({ _id, author, content, createdAt, upvotes, downvotes }: Answer) => {
+  // ✅ Convert _id to string
+  const answerId = _id.toString();
+  
+  const hasVotedPromise = hasVoted({
+    targetId: answerId, // ✅ Use string version
+    targetType: "answer",
+  });
+
   return (
     <article className="py-10">
-      <span id={JSON.stringify(_id)} className="mt-[-140px] block pb-[140px]" />
+      <span id={answerId} className="mt-[-140px] block pb-[140px]" />
       <div>
         <div className="mb-5 flex flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
           <div className="flex items-center gap-2">
@@ -32,8 +43,18 @@ const AnswerCard = ({ _id, author, content, createdAt }: Answer) => {
             answered {getTimeStamp(createdAt)}
           </p>
         </div>
-        <div className="flex justify-end text-xs text-gray-400 mb-2">Votes</div>
-        
+        <div className="flex justify-end text-xs text-gray-400 mb-2">
+          <Suspense fallback={<div>Loading...</div>}>
+            <Votes
+              upvotes={upvotes}
+              downvotes={downvotes}
+              targetType="answer"
+              targetId={answerId} // ✅ Use string version
+              hasVotedPromise={hasVotedPromise}
+            />
+          </Suspense>
+        </div>
+
         {/* ✅ CSS-only collapsible content */}
         <div className="w-full max-w-full break-all">
           <details className="group">
@@ -47,7 +68,7 @@ const AnswerCard = ({ _id, author, content, createdAt }: Answer) => {
                 Read More ↓
               </div>
             </summary>
-            
+
             {/* Full content when expanded */}
             <div className="group-open:block">
               <Preview content={content} />

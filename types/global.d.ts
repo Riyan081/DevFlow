@@ -89,11 +89,13 @@ interface GetAnswersParams extends PaginationSearchParams{
 }
 
 
-interface Answer{
-  _id:string;
-  content:string;
-  author:Author;
-  createdAt:Date;
+export type Answer = {
+  _id: string;
+  author: User;
+  content: string;
+  createdAt: string;
+  upvotes: number;
+  downvotes: number;
 }
 
 interface CreateVoteParams{
