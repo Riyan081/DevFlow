@@ -12,6 +12,7 @@ import { GetAnswers } from "@/lib/actions/answer.action";
 import Allanswers from "@/components/answers/Allanswers";
 import Votes from "@/components/votes/votes";
 import { hasVoted } from "@/lib/actions/vote.action";
+import SaveQuestion from "@/components/questions/SaveQuestion";
 
 //npm install next-mdx-remote
 //npm install bright
@@ -133,6 +134,11 @@ const QuestionDetails = async ({
                 hasVotedPromise={hasVotedPromise}
               />
             </Suspense>
+            <Suspense fallback={<div>Loading</div>}>
+              
+              <SaveQuestion questionId={question._id} />
+
+           </Suspense>
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-"user server";
+"use server";
 import { CollectionBaseParams } from "@/types/global";
 import { CollectionBaseSchema } from "../validations";
 import action from "../handlers/action";
