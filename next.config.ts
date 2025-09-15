@@ -9,14 +9,18 @@ const nextConfig: NextConfig = {
         hostname: "encrypted-tbn0.gstatic.com",
       },
       {
-        protocol:"https",
-        hostname:"lh3.googleusercontent.com",
-        port:""
-
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        port: "",
       },
       {
         protocol: "https",
         hostname: "avatars.githubusercontent.com",
+        port: "",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.vogue.in", // ✅ Added for your image
         port: "",
       },
     ],
@@ -25,4 +29,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-// filepath: e:\devflow2.0\next.config.ts
