@@ -3,6 +3,9 @@ import React from "react";
 import { getUsers } from "@/lib/actions/user.action";
 import LocalSearch from "@/components/search/LocalSearch";
 import UserCard from "@/components/cards/UserCard";
+interface SearchParams {
+  searchParams: Promise<{ [key: string]: string }>;
+}
 
 const Community = async ({ searchParams }: SearchParams) => {
   const { page, pageSize, query, filter } = await searchParams;

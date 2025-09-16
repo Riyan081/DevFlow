@@ -13,6 +13,7 @@ import Allanswers from "@/components/answers/Allanswers";
 import Votes from "@/components/votes/votes";
 import { hasVoted } from "@/lib/actions/vote.action";
 import SaveQuestion from "@/components/questions/SaveQuestion";
+import { hasSavedQuestion } from "@/lib/actions/collection.action";
 
 //npm install next-mdx-remote
 //npm install bright
@@ -103,6 +104,7 @@ const QuestionDetails = async ({
   });
   console.log("answerResult", answerResult);
   const hasVotedPromise = hasVoted({ targetId: id, targetType: "question" });
+  const hasSavedQuestionPromise = hasSavedQuestion({ questionId: question._id });
   const { author, createdAt, answers, views, tags, content, title } = question;
 
   return (
@@ -136,7 +138,9 @@ const QuestionDetails = async ({
             </Suspense>
             <Suspense fallback={<div>Loading</div>}>
               
-              <SaveQuestion questionId={question._id} />
+              <SaveQuestion questionId={question._id}
+              hasSavedQuestionPromise={hasSavedQuestionPromise}
+              />
 
            </Suspense>
           </div>

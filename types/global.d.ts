@@ -123,3 +123,11 @@ interface HasVotedResponse{
 interface CollectionBaseParams{
   questionId:string;
 }
+
+
+interface Collection{
+  _id:string;
+  author: Author | string;
+  question: Question | string;
+}
+

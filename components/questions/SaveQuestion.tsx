@@ -1,32 +1,36 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { api } from "@/lib/api";
 import Image from "next/image";
 import { toast } from "sonner";
-import { toggleSaveQuestion } from "@/lib/actions/collection.action";
+import {
+  hasSavedQuestion,
+  toggleSaveQuestion,
+} from "@/lib/actions/collection.action";
 
 const SaveQuestion = ({ questionId }: { questionId: string }) => {
   const session = useSession();
   const email = session?.data?.user?.email;
   const [user, setUser] = useState(null);
-  const userId = user?._id;
-
+  const [hasSaved, setHasSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (email) {
       api.users.getByEmail(email).then((res) => {
         setUser(res.data);
-        console.log(res.data);
+        // After user is fetched, check if question is saved
+        hasSavedQuestion({ questionId }).then((result) => {
+          setHasSaved(result.data?.saved || false);
+        });
       });
     }
-  }, [email]);
+  }, [email, questionId]);
 
   const handleSave = async () => {
     if (isLoading) return;
-    if (!userId) return toast("Please login to save the question");
+    if (!user?._id) return toast("Please login to save the question");
     setIsLoading(true);
 
     try {
@@ -34,7 +38,7 @@ const SaveQuestion = ({ questionId }: { questionId: string }) => {
       if (!success) {
         toast.error(error || "Error saving the question");
       }
-
+      setHasSaved(data?.saved || false);
       toast(data?.saved ? "Question saved" : "Question removed from saved");
     } catch (err) {
       toast("Error saving the question");
@@ -43,11 +47,9 @@ const SaveQuestion = ({ questionId }: { questionId: string }) => {
     }
   };
 
-  const hasSaved = false; // Replace with actual logic to check if the question is saved
-
   return (
     <Image
-      src={ hasSaved ?`/icons/star-filled.svg` :`/icons/star-red.svg`}
+      src={hasSaved ? `/icons/star-filled.svg` : `/icons/star-red.svg`}
       alt="Star Icon"
       height={15}
       width={15}
