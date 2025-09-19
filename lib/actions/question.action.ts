@@ -380,4 +380,23 @@ export async function incrementView(params: IncrementViewParams) {
   }
 }
 
+export async function getHotQuestions(){
+  try{
+     
+    const questions = await Question.find().sort({views:-1,upvotes:-1}).limit(3);
+
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(questions))
+    }
+
+  }catch(error){
+    return{
+      success: false,
+      error: (error as Error).message || "Failed to fetch hot questions"
+    }
+  
+  }
+}
+
 

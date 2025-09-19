@@ -132,3 +132,19 @@ export const getTagsQuestions = async (params: GetTagQuestionParams) => {
     };
   }
 };
+
+
+export const getTopTags = async()=>{
+  try{
+   const tags = await Tag.find().sort({questions:-1}).limit(5);
+   return {
+    success:true,
+    data: JSON.parse(JSON.stringify(tags))
+   }
+  }catch(error){
+    return {
+      success: false,
+      error: (error as Error).message || "Failed to get top tags",
+    }
+  }
+}

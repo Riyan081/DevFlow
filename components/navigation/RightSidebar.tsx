@@ -2,16 +2,9 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import TagCard from "../cards/TagCard";
-const hotQuestions = [
-  {
-    _id: "1",
-    title: "How to use React Query",
-  },
-  { _id: "2", title: "What is the best way to learn Next.js" },
-  { _id: "3", title: "How to manage state in React" },
-  { _id: "4", title: "What is the difference between useState and useReducer" },
-  { _id: "5", title: "How to optimize performance in React applications" },
-];
+
+
+
 
 const popularTags = [
     {
@@ -37,8 +30,11 @@ const popularTags = [
     }
 
 ]
-
-const RightSidebar = () => {
+import { getHotQuestions } from "@/lib/actions/question.action";
+import { getTopTags } from "@/lib/actions/tag.action";
+const RightSidebar = async () => {
+  const {success,data:hotQuestions,error} = await getHotQuestions(); 
+  const {success:tagSuccess,data:tagData,error:tagError} = await getTopTags(); 
   return (
     <section className="bg-white dark:bg-[#121212] sticky right-0 top-0 w-[300px] flex flex-col gap-6 overflow-y-auto border-l max-md:hidden pt-3 pl-6 pr-5 ">
       <div>
@@ -60,7 +56,7 @@ const RightSidebar = () => {
         <h3 className="font-bold mb-5">Popular Tags</h3>
 
        <div>
-        {popularTags.map(({_id,name,questions})=>(
+        {tagData.map(({_id,name,questions})=>(
  
            <TagCard key={_id} _id={_id} name={name} questions={questions} showCount compact/>
          
