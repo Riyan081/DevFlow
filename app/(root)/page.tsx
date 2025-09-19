@@ -12,6 +12,7 @@ import DataRenderer from "@/components/DataRenderer";
 import { EMPTY_QUESTION } from "@/constants/states";
 import CommonFilter from "@/components/filters/CommonFilter";
 import { HomepageFilters } from "@/constants/filter";
+import Pagination from "@/components/Pagination";
 
 // const questions = [
 //   {
@@ -75,12 +76,12 @@ export default async function Home({ searchParams }: SearchParams) {
 
   const { success, data, error } = await getQuestions({
     page: Number(page) || 1,
-    pageSize: Number(pageSize) || 10,
+    pageSize: Number(pageSize) || 2,
     query: query || "",
     filter: filter || "",
   });
 
-  const { questions } = data || {};
+  const { questions, isNext } = data || {};
 
   //  const filteredQuestions = questions.filter((question)=>{
   //    const matchQuery = question.title.toLowerCase().includes(query.toLowerCase());
@@ -136,6 +137,7 @@ export default async function Home({ searchParams }: SearchParams) {
           </p>
         </div>
       )}
+      <Pagination page={page} isNext={!!isNext}/>
     </>
   );
 }

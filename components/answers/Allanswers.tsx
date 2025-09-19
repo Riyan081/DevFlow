@@ -2,12 +2,16 @@ import React from "react";
 import AnswerCard from "../cards/AnswerCard";
 import CommonFilter from "../filters/CommonFilter";
 import { AnswerFilters } from "@/constants/filter";
+import Pagination from "../Pagination";
 
 interface Props {
   data?: any[];
   success: boolean;
   error?: string | null;
   totalAnswers?: number;
+  page:number;
+  isNext:boolean;
+
 }
 
 //Example for my refrance how background with gradient and text with gradient exist
@@ -23,7 +27,7 @@ interface Props {
 //   </h3>
 // </div>
 
-const Allanswers = ({ data, success, error, totalAnswers }: Props) => {
+const Allanswers = ({page,isNext, data, success, error, totalAnswers }: Props) => {
   return (
     <div className="mt-11">
       <div className="flex items-center justify-between">
@@ -57,7 +61,9 @@ const Allanswers = ({ data, success, error, totalAnswers }: Props) => {
     </div>
   )}
 </div>
+<Pagination page={page} isNext={isNext}/>
     </div>
+  
   );
 };
 

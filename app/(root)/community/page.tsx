@@ -5,6 +5,7 @@ import LocalSearch from "@/components/search/LocalSearch";
 import UserCard from "@/components/cards/UserCard";
 import CommonFilter from "@/components/filters/CommonFilter";
 import { UserFilters } from "@/constants/filter";
+import Pagination from "@/components/Pagination";
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>;
 }
@@ -14,12 +15,13 @@ const Community = async ({ searchParams }: SearchParams) => {
 
   const { success, data, error } = await getUsers({
     page: Number(page) || 1,
-    pageSize: Number(pageSize) || 10,
+    pageSize: Number(pageSize) || 5,
     query: query || "",
     filter: filter || "newest",
   });
 
   const users = data?.users || [];
+  const { isNext } = data || {};
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Community Users</h1>
@@ -46,6 +48,7 @@ const Community = async ({ searchParams }: SearchParams) => {
       ) : (
         <p className="text-red-500">Error: {error}</p>
       )}
+      <Pagination page={page} isNext={!!isNext}/>
     </div>
   );
 };

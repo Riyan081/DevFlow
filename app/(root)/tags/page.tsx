@@ -33,7 +33,8 @@ const Tags = async ({ searchParams }: RouteParams) => {
     <>
     <h1 className="font-bold text-xl text-amber-50 mb-4">Tags</h1>
 
-    <section className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
+    <section >
+      <div className="flex justify-between items-center" >
       <LocalSearch
       route="/tags"
       imgsrc="/icons/search.svg"
@@ -42,8 +43,9 @@ const Tags = async ({ searchParams }: RouteParams) => {
       />
 
       <CommonFilter filters={TagFilters}
-       otherClasses="min-h-[56px] sm:min-w-[170px]"
+       otherClasses="min-h-[40px] w-3 sm:min-w-[170px]"
       />
+      </div>
 
 
 <div className="flex flex-wrap gap-4 mt-8"> 

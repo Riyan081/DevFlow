@@ -202,6 +202,8 @@ const QuestionDetails = async ({
 
       <section>
         <Allanswers
+          page={Number(page) || 1}
+          isNext={answerResult?.isNext || false}
           data={answerResult?.answers}
           success={aanswers}
           error={answerError}

@@ -5,6 +5,7 @@ import LocalSearch from "@/components/search/LocalSearch";
 import QuestionCard from "@/components/cards/QuestionCard";
 import { CollectionFilters } from "@/constants/filter";
 import CommonFilter from "@/components/filters/CommonFilter";
+import Pagination from "@/components/Pagination";
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>;
@@ -19,7 +20,7 @@ const Collections = async ({ searchParams }: SearchParams) => {
     pageSize: Number(pageSize) || 10,
   });
 
-  const { questions } = data || {};
+  const { questions,isNext } = data || {};
 
   return(
    <>
@@ -58,7 +59,7 @@ const Collections = async ({ searchParams }: SearchParams) => {
           </p>
         </div>
       )}
-   
+   <Pagination page={page} isNext={!!isNext}/>
    </>
 
 
