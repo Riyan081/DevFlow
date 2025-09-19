@@ -1,5 +1,7 @@
 import React from "react";
 import AnswerCard from "../cards/AnswerCard";
+import CommonFilter from "../filters/CommonFilter";
+import { AnswerFilters } from "@/constants/filter";
 
 interface Props {
   data?: any[];
@@ -29,7 +31,11 @@ const Allanswers = ({ data, success, error, totalAnswers }: Props) => {
           {totalAnswers}
           {totalAnswers === 1 ? " Answer" : " Answers"}
         </h3>
-        <p>Filters</p>
+       <CommonFilter filters={AnswerFilters}
+       otherClasses ="sm:min-w-32"
+       containerClasses="max-xs:w-full"
+       
+       />
       </div>
 
       <div>

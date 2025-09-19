@@ -3,6 +3,8 @@ import { getSavedQuestion } from "@/lib/actions/collection.action";
 import React from "react";
 import LocalSearch from "@/components/search/LocalSearch";
 import QuestionCard from "@/components/cards/QuestionCard";
+import { CollectionFilters } from "@/constants/filter";
+import CommonFilter from "@/components/filters/CommonFilter";
 
 interface SearchParams {
   searchParams: Promise<{ [key: string]: string }>;
@@ -29,6 +31,11 @@ const Collections = async ({ searchParams }: SearchParams) => {
    placeholder="Search Questions"
    otherClasses = "flex-1 "   
    />
+   <CommonFilter
+    filters={CollectionFilters}
+    otherClasses = "min-h-[56px] sm:min-w-[170px] mt-5"
+   />
+   
 
   {success ? (
         <div>

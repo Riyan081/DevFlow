@@ -3,6 +3,19 @@ import { getTags } from "@/lib/actions/tag.action";
 import LocalSearch from "@/components/search/LocalSearch";
 import QuestionCard from "@/components/cards/QuestionCard";
 import TagCard from "@/components/cards/TagCard";
+import CommonFilter from "@/components/filters/CommonFilter";
+import { TagFilters } from "@/constants/filter";
+interface RouteParam{
+  page:string;
+  pageSize:string;
+  query:string;
+  filter:string;
+
+}
+
+interface RouteParams{
+  searchParams:RouteParam;
+}
 const Tags = async ({ searchParams }: RouteParams) => {
   const { page, pageSize, query, filter } = await searchParams;
   const { success, data, error } = await getTags({
@@ -20,13 +33,19 @@ const Tags = async ({ searchParams }: RouteParams) => {
     <>
     <h1 className="font-bold text-xl text-amber-50 mb-4">Tags</h1>
 
-    <section>
+    <section className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
       <LocalSearch
       route="/tags"
       imgsrc="/icons/search.svg"
       placeholder="Search Tags..."
       otherClasses="flex-1"
       />
+
+      <CommonFilter filters={TagFilters}
+       otherClasses="min-h-[56px] sm:min-w-[170px]"
+      />
+
+
 <div className="flex flex-wrap gap-4 mt-8"> 
      {success ? (
   <div className="flex flex-wrap gap-4">

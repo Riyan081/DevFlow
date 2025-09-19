@@ -56,13 +56,22 @@ import { hasSavedQuestion } from "@/lib/actions/collection.action";
 //   },
 // ];
 
+interface QuestionDetailsProps {
+  params: { id: string };
+  searchParams: {
+    page?: string;
+    pageSize?: string;
+    filter?: string;
+  };
+}
+
 const QuestionDetails = async ({
-  params: paramsPromise,
-}: {
-  params: Promise<{ id: string }>;
-}) => {
-  const params = await paramsPromise;
+  params,
+  searchParams
+}: QuestionDetailsProps) => {
+  
   const { id } = params;
+  const { page, pageSize, filter } = searchParams;
   // const [_, { success, data: question }] = await Promise.all([
   //   await incrementView({ questionId: id }),
   //   await getQuestion({
@@ -98,15 +107,16 @@ const QuestionDetails = async ({
     error: answerError,
   } = await GetAnswers({
     questionId: id,
-    page: 1,
-    pageSize: 10,
-    filter: "latest",
+    page: Number(page) || 1,
+    pageSize: Number(pageSize) || 10,
+    filter: filter || "latest",
   });
   console.log("answerResult", answerResult);
   const hasVotedPromise = hasVoted({ targetId: id, targetType: "question" });
   const hasSavedQuestionPromise = hasSavedQuestion({ questionId: question._id });
   const { author, createdAt, answers, views, tags, content, title } = question;
-
+ 
+  
   return (
     <>
       <div className="flex-start w-full flex-col">
