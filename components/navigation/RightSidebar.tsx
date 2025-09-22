@@ -33,6 +33,7 @@ const popularTags = [
 import { getHotQuestions } from "@/lib/actions/question.action";
 import { getTopTags } from "@/lib/actions/tag.action";
 const RightSidebar = async () => {
+  const [] = await Promise.all([getHotQuestions(),getTopTags()]);
   const {success,data:hotQuestions,error} = await getHotQuestions(); 
   const {success:tagSuccess,data:tagData,error:tagError} = await getTopTags(); 
   return (

@@ -2,9 +2,11 @@
 
 import { FilterQuery } from "mongoose";
 import action from "../handlers/action";
-import { PaginationSearchSchema } from "../validations";
-import { PaginationSearchParams } from "@/types/global";
+import { GetUserSchema, PaginationSearchSchema } from "../validations";
+import { GetUserParams, PaginationSearchParams } from "@/types/global";
 import User from "@/database/user.model";
+import Question from "@/database/question.model";
+import Answer from "@/database/answer.model";
 
 export async function getUsers(params: PaginationSearchParams) {
   const validationResult = await action({
@@ -73,5 +75,36 @@ export async function getUsers(params: PaginationSearchParams) {
       success: false,
       error: "Failed to fetch users. Please try again later.",
     };
+  }
+}
+
+
+export async function getUser(params: GetUserParams){
+  const validationResult = await action({
+    params,
+    schema: GetUserSchema,
+    authorize: true,
+  })
+
+
+  const userId = validationResult.params?.userId;
+
+  try{
+
+    const user = await User.findById(userId).lean();
+    if(!user){
+      return{
+        success:false,
+        error:"User not found"
+      }
+    }
+
+    const totalQuestions = await Question.countDocuments({author:user._id});
+    const totalAnswers = await Answer.countDocuments({author:user._id});
+  }catch(error){
+    return{
+      success:false,
+      error: (error as Error).message || "Failed to fetch user. Please try again later.",
+    }
   }
 }

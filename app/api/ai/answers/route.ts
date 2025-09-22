@@ -74,7 +74,9 @@ CRITICAL RULES:
 
 - NEVER output raw HTML/JSX outside of fenced code blocks
 - Use headings (#, ##, ###) for structure
-- Use lists (-, 1.) for organization`,
+- Use lists (-, 1.) for organization
+-Give Proper Ans With Complete Explaination From Basics With Example Dont Give Unnecessary Information`
+,
       },
       {
         role: "user",

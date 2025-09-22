@@ -131,3 +131,7 @@ interface Collection{
   question: Question | string;
 }
 
+
+interface GetUserParams{
+  userId:string;
+}
