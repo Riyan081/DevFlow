@@ -101,6 +101,15 @@ export async function getUser(params: GetUserParams){
 
     const totalQuestions = await Question.countDocuments({author:user._id});
     const totalAnswers = await Answer.countDocuments({author:user._id});
+
+    return{
+      success:true,
+      data:{
+        user: JSON.parse(JSON.stringify(user)),
+        totalQuestions,
+        totalAnswers,
+      }
+    }
   }catch(error){
     return{
       success:false,
