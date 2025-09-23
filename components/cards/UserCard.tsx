@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 interface UserCardProps {
   _id: string;
   name: string;
@@ -10,6 +11,7 @@ interface UserCardProps {
 const UserCard = ({ _id, name, image, username }: UserCardProps) => {
   return (
     <div className="flex flex-col items-center bg-[#18181b] rounded-xl p-4 mb-4 mr-1 w-40 mx-auto shadow-lg">
+      <Link href={`/profile/${_id}`} className="flex flex-col items-center">
      <Image
   src={image || "/default-avatar.png"}
   alt={name}
@@ -17,6 +19,7 @@ const UserCard = ({ _id, name, image, username }: UserCardProps) => {
   width={64}
   className="rounded-full object-cover mb-2 border-2 border-gray-700"
 />
+</Link>
       <span className="text-white font-semibold text-lg">{name}</span>
       <span className="text-gray-400 text-sm">@{username}</span>
     </div>
