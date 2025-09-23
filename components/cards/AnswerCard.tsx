@@ -8,10 +8,17 @@ import Votes from "../votes/votes";
 import { hasVoted } from "@/lib/actions/vote.action";
 import { Suspense } from "react";
 
-const AnswerCard = ({ _id, author, content, createdAt, upvotes, downvotes }: Answer) => {
+const AnswerCard = ({
+  _id,
+  author,
+  content,
+  createdAt,
+  upvotes,
+  downvotes,
+}: Answer) => {
   // ✅ Convert _id to string
   const answerId = _id.toString();
-  
+
   const hasVotedPromise = hasVoted({
     targetId: answerId, // ✅ Use string version
     targetType: "answer",

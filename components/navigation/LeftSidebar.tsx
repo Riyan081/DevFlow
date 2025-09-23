@@ -5,10 +5,29 @@ import Link from "next/link";
 import ROUTES from "@/constants/routes";
 import { auth } from "@/auth";
 import { signOut } from "@/auth";
+import { api } from "@/lib/api";
 
 const LeftSidebar = async () => {
   const session = await auth();
-  const userId = session?.user?.id;
+    const email = session?.user?.email;
+  
+  let userId = null;
+  
+  if (email) {
+    try {
+      // ✅ Use your API response format (message + data)
+      const response = (await api.users.getByEmail(email)) as APIResponse<IUser>;
+      
+      // ✅ Check for data directly (since your API doesn't return success field)
+      if (response.data) {
+        userId = response.data._id;
+      } else {
+        console.error("API Error:", response.message);
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  }
 
   return (
     <div className="bg-[#121212] left-0 top-0 p-2 gap-4 max-sm:hidden lg:w-[210px] md:w-[64px] flex flex-col justify-between" style={{ height: "calc(100vh - 78px)" }}>
