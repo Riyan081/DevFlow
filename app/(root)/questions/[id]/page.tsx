@@ -70,8 +70,8 @@ const QuestionDetails = async ({
   searchParams
 }: QuestionDetailsProps) => {
   
-  const { id } = params;
-  const { page, pageSize, filter } = searchParams;
+  const { id } =await params;
+  const { page, pageSize, filter } = await searchParams;
   // const [_, { success, data: question }] = await Promise.all([
   //   await incrementView({ questionId: id }),
   //   await getQuestion({

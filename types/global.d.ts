@@ -156,3 +156,11 @@ interface User{
     SILVER:number;
     BRONZE:number;
   }
+
+  interface GetUserQuestionsParams extends Omit<PaginationSearchParams,"filter" | "sort" | "query">{
+   userId:string;
+  }
+
+  interface GetUserAnswersParams extends Omit<PaginationSearchParams,"filter" | "sort" | "query">{
+    userId:string;
+   }

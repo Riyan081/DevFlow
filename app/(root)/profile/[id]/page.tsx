@@ -11,14 +11,25 @@ import { Button } from "@/components/ui/button";
 import { IUser } from "@/database/user.model";
 import Stats from "@/components/user/Stats";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import QuestionCard from "@/components/cards/QuestionCard";
+import { getUserQuestions } from "@/lib/actions/user.action";
+import { getUserAnswers } from "@/lib/actions/user.action";
+import Pagination from "@/components/Pagination";
+import AnswerCard from "@/components/cards/AnswerCard";
 interface RouteParams {
   params: {
     id: string;
   };
+  searchParams: {
+    page?: string;
+    pageSize?: string;
+  };
 }
 
-const Profile = async ({ params }: RouteParams) => {
+const Profile = async ({ params, searchParams }: RouteParams) => {
+  const { page, pageSize } = await searchParams;
   const { id } = await params;
+
   if (!id) {
     notFound();
   }
@@ -63,6 +74,29 @@ const Profile = async ({ params }: RouteParams) => {
   const { name, _id, image, username, portfolio, location, createdAt, bio } =
     user || {};
 
+  const {
+    success: userQuestionsSuccess,
+    data: userQuestions,
+    error: userQuestionsError,
+  } = await getUserQuestions({
+    userId: id,
+    page: Number(page) || 1,
+    pageSize: Number(pageSize) || 5,
+  });
+
+  const {
+    success: userAnswersSuccess,
+    data: userAnswers,
+    error: userAnswersError,
+  } = await getUserAnswers({
+    userId: id,
+    page: Number(page) || 1,
+    pageSize: Number(pageSize) || 5,
+  });
+
+
+  const { questions, isNext: hasMoreQuestions } = userQuestions || {};
+ const { answers, isNext: hasMoreAnswers } = userAnswers || {};
   return (
     <div className="flex w-full flex-col gap-8 max-w-5xl mx-auto p-4">
       {/* Profile Header Section */}
@@ -167,19 +201,61 @@ const Profile = async ({ params }: RouteParams) => {
             <TabsTrigger value="answers"> Answers</TabsTrigger>
           </TabsList>
           <TabsContent value="top-posts">
-           List of Questions
+            {userQuestionsSuccess && questions && questions.length > 0 ? (
+              questions.map((question) => (
+                <QuestionCard key={question._id} question={question} />
+              ))
+            ) : (
+              <div className="mt-10 flex w-full items-center justify-center">
+                <p className="text-black  dark:text-amber-50">
+                  No Questions Found
+                </p>
+              </div>
+            )}
+
+            <Pagination
+              page={Number(page) || 1}
+              isNext={hasMoreQuestions}
+            
+               containerClasses="justify-start mt-10"
+            />
           </TabsContent>
-          <TabsContent value="answers">List of Answers</TabsContent>
+
+          <TabsContent value="answers">
+            {userAnswersSuccess && answers && answers.length > 0 ? (
+              answers.map((answer) => (
+                <AnswerCard key={answer._id} {...answer}/>  
+              ))
+            ) : (
+              <div className="mt-10 flex w-full items-center justify-center">
+                <p className="text-black  dark:text-amber-50">
+                  No Answers Found
+                </p>
+              </div>
+            )}
+
+            <Pagination
+              page={Number(page) || 1}
+              isNext={hasMoreAnswers}
+               containerClasses="justify-start mt-10"
+            />
+
+
+
+
+
+
+
+
+          </TabsContent>
         </Tabs>
 
         <div className="flex w-full min-w-[250px] flex1 flex-col max-lg:hidden">
-         <h3>Top Tags</h3>
-         <div>
-          <p>List of Tags</p>
-         </div>
+          <h3>Top Tags</h3>
+          <div>
+            <p>List of Tags</p>
+          </div>
         </div>
-
-        
       </section>
     </div>
   );
