@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import React from "react";
-import { getUser } from "@/lib/actions/user.action";
+import { getUser, getUserTopTags } from "@/lib/actions/user.action";
 import UserAvtar from "@/components/avtar/UserAvtar";
 import ProfileLink from "@/components/user/ProfileLink";
 import dayjs from "dayjs";
@@ -16,6 +16,7 @@ import { getUserQuestions } from "@/lib/actions/user.action";
 import { getUserAnswers } from "@/lib/actions/user.action";
 import Pagination from "@/components/Pagination";
 import AnswerCard from "@/components/cards/AnswerCard";
+import TagCard from "@/components/cards/TagCard";
 interface RouteParams {
   params: {
     id: string;
@@ -94,9 +95,17 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
     pageSize: Number(pageSize) || 5,
   });
 
+  const {
+    success: userTopTagsSuccess,
+    data: userTopTags,
+    error: userTopTagsError,
+  } = await getUserTopTags({
+    userId: id,
+  });
 
   const { questions, isNext: hasMoreQuestions } = userQuestions || {};
- const { answers, isNext: hasMoreAnswers } = userAnswers || {};
+  const { answers, isNext: hasMoreAnswers } = userAnswers || {};
+  const { tags } = userTopTags || {};
   return (
     <div className="flex w-full flex-col gap-8 max-w-5xl mx-auto p-4">
       {/* Profile Header Section */}
@@ -216,15 +225,14 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
             <Pagination
               page={Number(page) || 1}
               isNext={hasMoreQuestions}
-            
-               containerClasses="justify-start mt-10"
+              containerClasses="justify-start mt-10"
             />
           </TabsContent>
 
           <TabsContent value="answers">
             {userAnswersSuccess && answers && answers.length > 0 ? (
               answers.map((answer) => (
-                <AnswerCard key={answer._id} {...answer}/>  
+                <AnswerCard key={answer._id} {...answer} />
               ))
             ) : (
               <div className="mt-10 flex w-full items-center justify-center">
@@ -237,23 +245,32 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
             <Pagination
               page={Number(page) || 1}
               isNext={hasMoreAnswers}
-               containerClasses="justify-start mt-10"
+              containerClasses="justify-start mt-10"
             />
-
-
-
-
-
-
-
-
           </TabsContent>
         </Tabs>
 
         <div className="flex w-full min-w-[250px] flex1 flex-col max-lg:hidden">
           <h3>Top Tags</h3>
           <div>
-            <p>List of Tags</p>
+            {userTopTagsSuccess && tags && tags.length > 0 ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <TagCard
+                    key={tag._id}
+                    _id={tag._id}
+                    name={tag.name}
+                    questions={tag.count}
+                    showCount
+                    compact
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-10 flex w-full items-center justify-center">
+                <p className="text-black  dark:text-amber-50">No Tags Found</p>
+              </div>
+            )}
           </div>
         </div>
       </section>

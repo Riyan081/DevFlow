@@ -164,3 +164,9 @@ interface User{
   interface GetUserAnswersParams extends Omit<PaginationSearchParams,"filter" | "sort" | "query">{
     userId:string;
    }
+
+
+
+   interface GetUserTagsParams{
+    userId:string;
+   }

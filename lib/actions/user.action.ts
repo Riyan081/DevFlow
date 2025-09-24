@@ -1,9 +1,9 @@
 "use server";
 
-import { FilterQuery } from "mongoose";
+import { FilterQuery, PipelineStage, Types } from "mongoose";
 import action from "../handlers/action";
-import { GetUserSchema, PaginationSearchSchema } from "../validations";
-import { GetUserParams, PaginationSearchParams } from "@/types/global";
+import { GetUserSchema, GetUsersTagSchema, PaginationSearchSchema } from "../validations";
+import { GetUserParams, GetUserTagsParams, PaginationSearchParams } from "@/types/global";
 import User from "@/database/user.model";
 import Question from "@/database/question.model";
 import Answer from "@/database/answer.model";
@@ -205,6 +205,60 @@ export async function getUserAnswers(params: GetUserAnswersParams) {
         totalAnswers
       },
     };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        (error as Error).message ||
+        "Failed to fetch user. Please try again later.",
+    };
+  }
+}
+
+
+
+export async function getUserTopTags(params: GetUserTagsParams) {
+  const validationResult = await action({
+    params,
+    schema: GetUsersTagSchema,
+    authorize: true,
+  });
+
+  const userId = validationResult.params?.userId;
+
+ 
+  try {
+  const pipeline = [
+  { $match: { author: new Types.ObjectId(userId) } },
+  { $unwind: "$tags" },
+  { $group: { _id: "$tags", count: { $sum: 1 } } },
+  { $lookup: {
+      from: "tags",
+      localField: "_id",
+      foreignField: "_id",
+      as: "tagDetails"
+    }
+  },
+  { $unwind: "$tagDetails" },
+  { $sort: { count: -1 } },
+  { $limit: 10 },
+  { $project: {
+      _id: "$tagDetails._id",
+      name: "$tagDetails.name",
+      count: 1
+    }
+  }
+];
+
+    const tags = await Question.aggregate(pipeline);
+
+    return {
+      success: true,
+      data: {
+        tags: JSON.parse(JSON.stringify(tags)),
+      },
+    };
+    
   } catch (error) {
     return {
       success: false,
