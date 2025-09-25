@@ -22,6 +22,12 @@ import User from "@/database/user.model"; // Add this import at the top
 import { EditQuestionSchema } from "@/lib/validations";
 import { Action } from "sonner";
 import { revalidatePath } from "next/cache";
+import { DeleteQuestionSchema } from "@/lib/validations";
+import { DeleteQuestionParams } from "@/types/global";
+import { Vote } from "@/database";
+import Answer from "@/database/answer.model";
+import Collection from "@/database/collection.model";
+
 
 export async function createQuestion(
   params: CreateQuestionParams
@@ -297,7 +303,7 @@ export async function getQuestions(
       { content: { $regex: new RegExp(query, "i") } },
     ];
   }
- 
+
   let sortCriteria = {};
 
   switch (filter) {
@@ -363,10 +369,6 @@ export async function incrementView(params: IncrementViewParams) {
       { new: true }
     );
 
-    
-    
-
-
     if (!question) {
       return { success: false, error: "Question not found" };
     }
@@ -380,23 +382,108 @@ export async function incrementView(params: IncrementViewParams) {
   }
 }
 
-export async function getHotQuestions(){
-  try{
-     
-    const questions = await Question.find().sort({views:-1,upvotes:-1}).limit(3);
+export async function getHotQuestions() {
+  try {
+    const questions = await Question.find()
+      .sort({ views: -1, upvotes: -1 })
+      .limit(3);
 
     return {
       success: true,
-      data: JSON.parse(JSON.stringify(questions))
-    }
-
-  }catch(error){
-    return{
+      data: JSON.parse(JSON.stringify(questions)),
+    };
+  } catch (error) {
+    return {
       success: false,
-      error: (error as Error).message || "Failed to fetch hot questions"
-    }
-  
+      error: (error as Error).message || "Failed to fetch hot questions",
+    };
   }
 }
 
+export async function deleteQuestion(params: DeleteQuestionParams) {
+  const validationResult = await action({
+    params,
+    schema: DeleteQuestionSchema,
+    authorize: true,
+  });
 
+  if (validationResult instanceof Error) {
+    return { success: false, error: validationResult.message };
+  }
+
+  const { questionId } = validationResult.params!;
+  const userEmail = validationResult.session?.user?.email;
+  const session = await mongoose.startSession();
+
+  try {
+    const question = await Question.findById(questionId).session(session);
+    if (!question) {
+      return { success: false, error: "Question not found" };
+    }
+    const user = await User.findOne({
+      email: userEmail,
+    });
+    if (!user) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    if (question.author.toString() !== user._id.toString()) {
+      return {
+        success: false,
+        error: "You are not authorized to delete this question",
+      };
+    }
+
+    await TagQuestion.deleteMany({
+      question: question._id,
+    });
+    await Collection.deleteMany({
+      question: question._id,
+    });
+
+    if (question.tags && question.tags.length > 0) {
+      await Tag.updateMany(
+        { _id: { $in: question.tags } },
+        { $inc: { questions: -1 } },
+        { session }
+      );
+    }
+
+    await Vote.deleteMany({
+      actionId: question._id,
+      actionType: "question",
+    }).session(session);
+
+
+    const answers = await Answer.find({
+      question: question._id,
+    }).session(session);
+
+    if(answers && answers.length >0){
+      await Answer.deleteMany({
+        question: question._id,
+      }).session(session);
+
+      await Vote.deleteMany({
+        actionId: { $in: answers.map((a) => a._id) },
+        actionType: "answer",
+      }).session(session)
+    }
+
+     await Question.findByIdAndDelete(question._id).session(session);
+    await session.commitTransaction();
+    revalidatePath("/");
+    revalidatePath(`/profile/${user?.id}`);
+    return { success: true, data: null };
+
+
+    
+  } catch (error) {
+    return {
+      success: false,
+      error: (error as Error).message || "Failed to delete question",
+    };
+  } finally {
+    session.endSession();
+  }
+}

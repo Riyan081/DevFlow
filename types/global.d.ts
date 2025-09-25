@@ -170,3 +170,9 @@ interface User{
    interface GetUserTagsParams{
     userId:string;
    }
+
+  
+interface DeleteQuestionParams{
+  questionId:string;
+}
+
