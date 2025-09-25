@@ -212,7 +212,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
           <TabsContent value="top-posts">
             {userQuestionsSuccess && questions && questions.length > 0 ? (
               questions.map((question) => (
-                <QuestionCard key={question._id} question={question} />
+                <QuestionCard key={question._id} question={question} showActionBtns={loggedInUserId === _id}/>
               ))
             ) : (
               <div className="mt-10 flex w-full items-center justify-center">
@@ -232,7 +232,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
           <TabsContent value="answers">
             {userAnswersSuccess && answers && answers.length > 0 ? (
               answers.map((answer) => (
-                <AnswerCard key={answer._id} {...answer} />
+                <AnswerCard key={answer._id} {...answer} showActionBtn={loggedInUserId === _id} />
               ))
             ) : (
               <div className="mt-10 flex w-full items-center justify-center">

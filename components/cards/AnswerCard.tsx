@@ -8,6 +8,13 @@ import Votes from "../votes/votes";
 import { hasVoted } from "@/lib/actions/vote.action";
 import { Suspense } from "react";
 
+import EditDeleteAction from "../user/EditDeleteAction";
+
+
+interface Props extends Answer{
+  showActionBtns?: boolean;
+}
+
 const AnswerCard = ({
   _id,
   author,
@@ -15,7 +22,8 @@ const AnswerCard = ({
   createdAt,
   upvotes,
   downvotes,
-}: Answer) => {
+  showActionBtns = false,
+}: Props) => {
   // ✅ Convert _id to string
   const answerId = _id.toString();
 
@@ -27,6 +35,15 @@ const AnswerCard = ({
   return (
     <article className="py-10">
       <span id={answerId} className="mt-[-140px] block pb-[140px]" />
+      {
+        showActionBtns &&(
+             <div>
+              <EditDeleteAction
+              type="Answer"
+              itemId={answerId}/>
+             </div>
+        )
+      }
       <div>
         <div className="mb-5 flex flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
           <div className="flex items-center gap-2">

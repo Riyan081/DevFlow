@@ -6,19 +6,27 @@ import TagCard from './TagCard';
 import Image from 'next/image';
 import { Question } from '@/types/global';
 import avatar from '/public/icons/avatar.svg';
+import EditDeleteAction from '@/components/user/EditDeleteAction';
 
 interface Props {
   question: Question;
+  showActionBtns?: boolean;
 }
 
 const QuestionCard = ({
-  question: { _id, title, tags, author, createdAt, upvotes, answers, views }
+  question: { _id, title, tags, author, createdAt, upvotes, answers, views },
+  showActionBtns=false,
 }: Props) => {
   return (
     <div className="bg-white dark:bg-[#181818] rounded-2xl shadow-md border border-gray-200 dark:border-gray-800 p-6 m-8 transition hover:shadow-lg flex flex-col gap-4">
       {/* Top: Time */}
       <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
         <span>{getTimeStamp(createdAt)}</span>
+        {
+          showActionBtns && (
+            <EditDeleteAction type="Question" itemId={_id} />
+          )
+        }
       </div>
       {/* Title */}
       <Link href={ROUTES.QUESTION(_id)}>
