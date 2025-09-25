@@ -1,3 +1,4 @@
+import { IInteraction } from './../database/interaction.model';
 import { SignInWithOAuthSchema } from "./../lib/validations";
 
 interface Tag {
@@ -176,3 +177,29 @@ interface DeleteQuestionParams{
   questionId:string;
 }
 
+
+
+
+
+interface CreateInteractionParams {
+  action:
+    | "view"
+    | "upvote"
+    | "downvote"
+    | "bookmark"
+    | "post"
+    | "edit"
+    | "delete"
+    | "search";
+  actionId: string;
+  authorId: string;
+  actionTarget: "question" | "answer";
+}
+
+
+interface UpdateReputationParams{
+  interaction: IInteraction;
+  session: mongoose.ClientSession;
+  performerId: string; // person who performed the action
+  authorId: string; // person who owns the content (question/answer)
+}
