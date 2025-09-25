@@ -210,3 +210,9 @@ interface Badges {
   BRONZE: number;
 }
 
+interface RecommendationParams {
+  userId: string;
+  query?: string;
+  skip: number;
+  limit: number;
+}
