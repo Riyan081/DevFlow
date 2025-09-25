@@ -137,7 +137,7 @@ export default async function Home({ searchParams }: SearchParams) {
           </p>
         </div>
       )}
-      <Pagination page={page} isNext={!!isNext}/>
+      <Pagination page={Number(page) || 1} isNext={!!isNext}/>
     </>
   );
 }

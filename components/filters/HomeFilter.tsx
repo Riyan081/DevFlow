@@ -10,13 +10,13 @@ import { removeKeysFromUrlQuery } from "@/lib/url";
 import { useRouter } from "next/navigation";
 
 const filters = [
-  {name:"React", value:'react'},
-  {name:"JavaScript", value:"javascript"},
+  // {name:"React", value:'react'},
+  // {name:"JavaScript", value:"javascript"},
   
-  // { name: "Newest", value: "newest" },
-  // { name: "Popular", value: "popular" },
-  // { name: "Unanswered", value: "unanswerd" },
-  // { name: "Recommended", value: "recommmended" },
+  { name: "Newest", value: "newest" },
+  { name: "Popular", value: "popular" },
+  { name: "Unanswered", value: "unanswered" },
+  { name: "Recommended", value: "recommended" },
 ];
 
 const HomeFilter = () => {
