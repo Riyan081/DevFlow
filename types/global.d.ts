@@ -203,3 +203,10 @@ interface UpdateReputationParams{
   performerId: string; // person who performed the action
   authorId: string; // person who owns the content (question/answer)
 }
+
+interface Badges {
+  GOLD: number;
+  SILVER: number;
+  BRONZE: number;
+}
+

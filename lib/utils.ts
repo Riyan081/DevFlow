@@ -128,7 +128,7 @@ export const formatNumber = (number:number)=>{
   }
 }
 
-import BADGE_CRITERIA from "@/constants/badges";
+import { BADGE_CRITERIA } from "@/constants/filter";
 import { Badges } from "@/types/global";
 
 export const assignBadges = (params: { criteria: {

@@ -1,5 +1,6 @@
 import mongoose, { models } from "mongoose";
 import {Types} from "mongoose";
+import { InteractionActionEnums } from "@/lib/constants";
 
 export interface IInteraction {
     user: Types.ObjectId;
@@ -7,7 +8,6 @@ export interface IInteraction {
     actionId: Types.ObjectId; // question/answer
     actionType: "question" | "answer";
 }
-
 
 const interactionSchema = new mongoose.Schema({
     user:{
@@ -18,6 +18,7 @@ const interactionSchema = new mongoose.Schema({
     action:{
         type: String,
         required: true,
+        enum: InteractionActionEnums
     
     },
     actionId:{ //question/answer

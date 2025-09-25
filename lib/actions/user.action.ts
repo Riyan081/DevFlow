@@ -9,6 +9,10 @@ import Question from "@/database/question.model";
 import Answer from "@/database/answer.model";
 import { GetUserQuestionsParams, GetUserAnswersParams } from "@/types/global";
 import { GetUserAnswersSchema } from "../validations";
+import { assignBadges } from "../utils";
+import { Badges } from "@/types/global";
+import handleError from "../handlers/error";
+import { ActionResponse, ErrorResponse } from "../handlers/fetch";
 
 
 export async function getUsers(params: PaginationSearchParams) {
@@ -84,38 +88,26 @@ export async function getUser(params: GetUserParams) {
   const validationResult = await action({
     params,
     schema: GetUserSchema,
-    authorize: true,
   });
 
-  const userId = validationResult.params?.userId;
+  if (validationResult instanceof Error) {
+    return handleError(validationResult) as ErrorResponse;
+  }
+
+  const { userId } = params;
 
   try {
-    const user = await User.findById(userId).lean();
-    if (!user) {
-      return {
-        success: false,
-        error: "User not found",
-      };
-    }
-
-    const totalQuestions = await Question.countDocuments({ author: user._id });
-    const totalAnswers = await Answer.countDocuments({ author: user._id });
+    const user = await User.findById(userId);
+    if (!user) throw new Error("User not found");
 
     return {
       success: true,
       data: {
         user: JSON.parse(JSON.stringify(user)),
-        totalQuestions,
-        totalAnswers,
       },
     };
   } catch (error) {
-    return {
-      success: false,
-      error:
-        (error as Error).message ||
-        "Failed to fetch user. Please try again later.",
-    };
+    return handleError(error) as ErrorResponse;
   }
 }
 
@@ -314,23 +306,27 @@ export async function getUserStats(params: GetUserParams): Promise<
       },
     ]);
 
+    // Handle cases where aggregation might return undefined
+    const questionData = questionStats || { count: 0, upvotes: 0, views: 0 };
+    const answerData = answerStats || { count: 0, upvotes: 0 };
+
     const badges = assignBadges({
       criteria: [
-        { type: "ANSWER_COUNT", count: answerStats.count },
-        { type: "QUESTION_COUNT", count: questionStats.count },
+        { type: "ANSWER_COUNT", count: answerData.count },
+        { type: "QUESTION_COUNT", count: questionData.count },
         {
           type: "QUESTION_UPVOTES",
-          count: questionStats.upvotes + answerStats.upvotes,
+          count: questionData.upvotes + answerData.upvotes,
         },
-        { type: "TOTAL_VIEWS", count: questionStats.views },
+        { type: "TOTAL_VIEWS", count: questionData.views },
       ],
     });
 
     return {
       success: true,
       data: {
-        totalQuestions: questionStats.count,
-        totalAnswers: answerStats.count,
+        totalQuestions: questionData.count,
+        totalAnswers: answerData.count,
         badges,
       },
     };

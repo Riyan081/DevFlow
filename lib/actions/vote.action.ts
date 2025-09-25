@@ -10,6 +10,9 @@ import { Vote } from "@/database";
 import { Question, Answer } from "@/database";
 import { HasVotedParams } from "@/types/global";
 import { revalidatePath } from "next/cache";
+import { createInteraction } from "./interaction.action";
+import { after } from "next/server";
+import { Interaction } from "@/database";
 
 
 export async function updateVoteCount(
@@ -78,6 +81,14 @@ export async function createVote(params: CreateVoteParams) {
   session.startTransaction();
 
   try {
+    // Get the content to find its author
+    const Model = targetType === "question" ? Question : Answer;
+    const contentDoc = await Model.findById(targetId).session(session);
+    if (!contentDoc) {
+      throw new Error("Content not found");
+    }
+    const contentAuthorId = contentDoc.author.toString();
+
     const existingVote = await Vote.findOne({
       author: userId,
       id: targetId,
@@ -127,7 +138,16 @@ export async function createVote(params: CreateVoteParams) {
         session
       );
     }
-   
+      after(async () => {
+      await createInteraction({
+        action: voteType,
+        actionId: targetId,
+        actionTarget: targetType,
+        authorId: contentAuthorId,
+      });
+    });
+
+
     revalidatePath(`/questions/${targetId}`);
     await session.commitTransaction();
     return { success: true };

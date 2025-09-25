@@ -9,6 +9,9 @@ import { ZodError } from "zod";
 import { Question, Answer } from "@/database";
 import { revalidatePath } from "next/cache";
 import { GetAnswersSchema } from "./../validations";
+import { createInteraction } from "./interaction.action";
+import { after } from "next/server";
+import { Interaction } from "@/database";
 
 export async function createAnswer(params: CreateAnsewerParams) {
   const validateResult = await action({
@@ -56,6 +59,14 @@ export async function createAnswer(params: CreateAnsewerParams) {
 
     question.answers += 1;
     await question.save({ session });
+      after(async () => {
+      await createInteraction({
+        action: "post",
+        actionId: newAnswer._id.toString(),
+        actionTarget: "answer",
+        authorId: userId as string,
+      });
+    });
     await session.commitTransaction();
 
     revalidatePath(`/questions/${questionId}`);
