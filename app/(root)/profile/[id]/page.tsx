@@ -249,7 +249,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
           </TabsContent>
         </Tabs>
 
-        <div className="flex w-full min-w-[250px] flex1 flex-col max-lg:hidden">
+        <div className="flex w-1/2 flex1 flex-col max-lg:hidden">
           <h3>Top Tags</h3>
           <div>
             {userTopTagsSuccess && tags && tags.length > 0 ? (
