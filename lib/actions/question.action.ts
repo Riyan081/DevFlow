@@ -309,8 +309,8 @@ export async function getQuestions(
  try{
    if (filter === "recommended") {
       const session = await auth();
-      const email = session?.user?.id;
-      const user = await User.find({ email });
+      const email = session?.user?.email;
+      const user = await User.findOne({ email });
       const userId = user?._id?.toString();
 
       if (!userId) {
@@ -407,6 +407,21 @@ export async function getRecommendedQuestions({
 
   // Remove duplicates
   const uniqueTagIds = [...new Set(allTags)];
+
+  // Fallback: If no tags, show popular questions
+  if (uniqueTagIds.length === 0) {
+    const fallbackQuestions = await Question.find({ author: { $ne: userId } })
+      .populate("tags", "name")
+      .populate("author", "name image")
+      .sort({ upvotes: -1, views: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    return {
+      questions: JSON.parse(JSON.stringify(fallbackQuestions)),
+      isNext: false,
+    };
+  }
 
   const recommendedQuery: FilterQuery<typeof Question> = {
     // exclude interacted questions

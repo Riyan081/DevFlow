@@ -18,6 +18,7 @@ import { hasSavedQuestion } from "@/lib/actions/collection.action";
 //npm install next-mdx-remote
 //npm install bright
 
+
 // const questions = [
 //   {
 //     _id: "1",
@@ -62,6 +63,28 @@ interface QuestionDetailsProps {
     page?: string;
     pageSize?: string;
     filter?: string;
+  };
+}
+
+export async function generateMetadata({params}:QuestionDetailsProps) {
+ const {id}=params;
+  const { success, data: question } = await getQuestion({
+    questionId: id,
+  });
+  if (!success || !question) {
+    return {
+      title: "Question not found",
+      description: "The question you are looking for does not exist.",
+    };
+  }
+  return {
+    title: question.title,
+    description: question.content.slice(0, 160), // First 160 characters of content
+    twitter:{
+      card:"summary_large_image",
+      title:question.title,
+      description:question.content.slice(0,160)
+    }
   };
 }
 
