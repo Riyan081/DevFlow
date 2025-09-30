@@ -1,4 +1,3 @@
-import { SearchParams } from "next/dist/server/request/search-params";
 import React from "react";
 import { getUsers } from "@/lib/actions/user.action";
 import LocalSearch from "@/components/search/LocalSearch";
@@ -6,11 +5,11 @@ import UserCard from "@/components/cards/UserCard";
 import CommonFilter from "@/components/filters/CommonFilter";
 import { UserFilters } from "@/constants/filter";
 import Pagination from "@/components/Pagination";
-interface SearchParams {
+interface CommunitySearchParams {
   searchParams: Promise<{ [key: string]: string }>;
 }
 
-const Community = async ({ searchParams }: SearchParams) => {
+const Community = async ({ searchParams }: CommunitySearchParams) => {
   const { page, pageSize, query, filter } = await searchParams;
 
   const { success, data, error } = await getUsers({

@@ -14,7 +14,7 @@ interface RouteParam{
 }
 
 interface RouteParams{
-  searchParams:RouteParam;
+  searchParams: Promise<RouteParam>;
 }
 const Tags = async ({ searchParams }: RouteParams) => {
   const { page, pageSize, query, filter } = await searchParams;

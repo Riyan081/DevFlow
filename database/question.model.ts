@@ -4,6 +4,8 @@ import { models } from "mongoose";
 import { Types } from 'mongoose';
 
 export interface IQuestion{
+  _id?: string | Types.ObjectId;
+  id?: string;
   title:string;
   content:string;
   tags:Types.ObjectId[];
@@ -11,7 +13,9 @@ export interface IQuestion{
   upvotes:number;
   downvotes:number;
   answers:number;
-  author: Types.ObjectId
+  author: Types.ObjectId;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const QuestionSchema = new mongoose.Schema({

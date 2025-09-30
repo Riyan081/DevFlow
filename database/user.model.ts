@@ -1,10 +1,11 @@
 
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { models } from "mongoose";
 
 export interface IUser{
-  id: string | undefined;
- name: string;
+  _id?: string | mongoose.Types.ObjectId;
+  id?: string;
+  name: string;
   username: string;
   email: string;
   bio?: string;
@@ -12,7 +13,8 @@ export interface IUser{
   location?: string;
   portfolio?: string;
   reputation?: number;
-
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const UserSchema = new mongoose.Schema({

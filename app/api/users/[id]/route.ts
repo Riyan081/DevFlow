@@ -5,8 +5,8 @@ import { z } from "zod";
 import User from "@/database/user.model";
 
 
-export async function GET(req:NextRequest,{params}:{params:{id:string}}) {
-  const { id } = params;
+export async function GET(req:NextRequest,{params}:{params:Promise<{id:string}>}) {
+  const { id } = await params;
   
   if(!id){
     throw new Error("User ID is required");
@@ -45,8 +45,8 @@ export async function GET(req:NextRequest,{params}:{params:{id:string}}) {
 
 
 
-export async function DELETE(req:NextRequest,{params}:{params:{id:string}}){
-    const { id } = params;
+export async function DELETE(req:NextRequest,{params}:{params:Promise<{id:string}>}){
+    const { id } = await params;
     if(!id){
         throw new Error("User ID is required");
     }
@@ -80,8 +80,8 @@ catch(e:any)
 }
 
 
-export async function PUT(req:NextRequest,{params}:{params:{id:string}}){
-    const { id } = params;
+export async function PUT(req:NextRequest,{params}:{params:Promise<{id:string}>}){
+    const { id } = await params;
     if(!id){
         throw new Error("User ID is required");
     }

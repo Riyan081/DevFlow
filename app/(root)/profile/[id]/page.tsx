@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import React from "react";
+import { ActionResponse } from "@/lib/handlers/fetch";
 import { getUser, getUserTopTags, getUserStats } from "@/lib/actions/user.action";
 import UserAvtar from "@/components/avtar/UserAvtar";
 import ProfileLink from "@/components/user/ProfileLink";
@@ -18,13 +19,13 @@ import Pagination from "@/components/Pagination";
 import AnswerCard from "@/components/cards/AnswerCard";
 import TagCard from "@/components/cards/TagCard";
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     page?: string;
     pageSize?: string;
-  };
+  }>;
 }
 
 const Profile = async ({ params, searchParams }: RouteParams) => {
@@ -47,13 +48,13 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
   let loggedInUserId = null;
 
   try {
-    const Userl = (await api.users.getByEmail(email)) as APIResponse<IUser>;
+    const Userl = (await api.users.getByEmail(email)) as ActionResponse<IUser>;
 
     if (!Userl?.data?._id) {
       notFound();
     }
 
-    loggedInUserId = Userl.data._id;
+    loggedInUserId = Userl.data._id.toString();
   } catch (error) {
     console.error("Error fetching user:", error);
     notFound();
@@ -172,7 +173,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
 
         {/* Right Side - Edit Button */}
         <div className="flex justify-center sm:justify-end">
-          {loggedInUserId === _id && (
+          {loggedInUserId === _id?.toString() && (
             <Link href="/profile/edit">
               <Button className="bg-gradient-to-r from-orange-400 to-orange-300 hover:from-orange-500 hover:to-orange-400 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border-0">
                 <svg
@@ -211,7 +212,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
           <TabsContent value="top-posts">
             {userQuestionsSuccess && questions && questions.length > 0 ? (
               questions.map((question) => (
-                <QuestionCard key={question._id} question={question} showActionBtns={loggedInUserId === _id}/>
+                <QuestionCard key={question._id} question={question} showActionBtns={loggedInUserId === _id?.toString()}/>
               ))
             ) : (
               <div className="mt-10 flex w-full items-center justify-center">
@@ -231,7 +232,7 @@ const Profile = async ({ params, searchParams }: RouteParams) => {
           <TabsContent value="answers">
             {userAnswersSuccess && answers && answers.length > 0 ? (
               answers.map((answer) => (
-                <AnswerCard key={answer._id} {...answer} showActionBtn={loggedInUserId === _id} />
+                <AnswerCard key={answer._id} {...answer} showActionBtn={loggedInUserId === _id?.toString()} />
               ))
             ) : (
               <div className="mt-10 flex w-full items-center justify-center">

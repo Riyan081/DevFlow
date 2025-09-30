@@ -58,16 +58,16 @@ import { hasSavedQuestion } from "@/lib/actions/collection.action";
 // ];
 
 interface QuestionDetailsProps {
-  params: { id: string };
-  searchParams: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{
     page?: string;
     pageSize?: string;
     filter?: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({params}:QuestionDetailsProps) {
- const {id}=params;
+ const {id}=await params;
   const { success, data: question } = await getQuestion({
     questionId: id,
   });

@@ -31,7 +31,7 @@ const EditQuestion = async ({
   console.log("question.author:", question.author?.toString?.());
   console.log("session user id:", session?.user?.id);
 
-  const dbUser = await User.findOne({ email: session?.user?.email });
+  const dbUser = await (User as any).findOne({ email: session?.user?.email });
   if (!dbUser) {
     console.error("User not found in database. Redirecting to sign-in.");
     return redirect("/sign-in");
